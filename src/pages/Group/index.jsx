@@ -50,7 +50,6 @@ import { PiStudentThin } from "react-icons/pi";
 
 const { Column, HeaderCell, Cell } = Table;
 
-// Tartiblash uchun hafta kunlari
 const DAYS_ORDER = {
   Monday: 1,
   Tuesday: 2,
@@ -143,7 +142,7 @@ function Group() {
           q = query(
             coll,
             where("studentName", ">=", text),
-            where("studentName", "<=", text + "\uf8ff")
+            where("studentName", "<=", text + "\uf8ff"),
           );
         }
         const snapshot = await getCountFromServer(q);
@@ -152,7 +151,7 @@ function Group() {
         console.error(error);
       }
     },
-    [id]
+    [id],
   );
 
   const loadData = useCallback(
@@ -169,7 +168,7 @@ function Group() {
             orderBy("studentName"),
             where("studentName", ">=", trimmedSearch),
             where("studentName", "<=", trimmedSearch + "\uf8ff"),
-            limit(displayLimit)
+            limit(displayLimit),
           );
         } else {
           if (pageNum === 1 || isNewSearch) {
@@ -179,7 +178,7 @@ function Group() {
               studentsRef,
               orderBy("studentName"),
               startAfter(lastDoc),
-              limit(displayLimit)
+              limit(displayLimit),
             );
           }
         }
@@ -199,7 +198,7 @@ function Group() {
         setLoading(false);
       }
     },
-    [id, searchKeyword, displayLimit, lastDoc, t, processDays]
+    [id, searchKeyword, displayLimit, lastDoc, t, processDays],
   );
 
   useEffect(() => {
@@ -234,7 +233,7 @@ function Group() {
           orderBy("groupName"),
           where("groupName", ">=", search),
           where("groupName", "<=", search + "\uf8ff"),
-          limit(20)
+          limit(20),
         );
       }
       const querySnapshot = await getDocs(q);
@@ -243,7 +242,7 @@ function Group() {
           label: d.data().groupName,
           value: d.id,
           days: d.data().days || d.data().weekdays || [],
-        }))
+        })),
       );
     } finally {
       setGroupSearchLoading(false);
@@ -271,7 +270,7 @@ function Group() {
       if (isGroupChanged) {
         // Yangi tanlangan guruh ma'lumotlarini topamiz
         const targetGroup = allGroups.find(
-          (g) => g.value === editData.targetGroupId
+          (g) => g.value === editData.targetGroupId,
         );
         const targetGroupDays = targetGroup?.days || [];
 
@@ -296,7 +295,7 @@ function Group() {
             lastName: editData.lastName,
             phoneNumber: editData.phoneNumber,
             days: finalDaysToSave, // Guruh kunlari bilan bir xil qilindi
-          }
+          },
         );
         batch.delete(doc(db, "groups", id, "students", selectedId));
         await batch.commit();
@@ -347,27 +346,291 @@ function Group() {
   };
 
   return (
-    <div style={{ padding: "clamp(10px, 2vw, 20px)" }}>
+    <div
+      style={{
+        padding: "clamp(10px, 2vw, 20px)",
+        backgroundColor: theme === "dark" ? "#0F131A" : "#f5f7fa",
+        minHeight: "100vh",
+      }}
+    >
       <style>{`
-          .rs-table-cell { background: ${
-            theme === "dark" ? "#1b212b !important" : "#fff !important"
-          }; border: 1px solid ${
-        theme === "dark" ? "#373d47" : "#f0f0f0"
-      } !important; }
-          .modal-themed .rs-modal-content { background: ${
-            theme === "dark" ? "#1a1d24" : "#fff"
-          }; color: ${theme === "dark" ? "#fff" : "#333"}; }
-          .capitalize-text { text-transform: capitalize; }
-      `}</style>
+    /* Asosiy table styling */
+    .rs-table {
+      background: ${theme === "dark" ? "#1b212b" : "#ffffff"} !important;
+    }
+    
+    .rs-table-cell {
+      background: ${theme === "dark" ? "#1b212b !important" : "#fff !important"};
+      border: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"} !important;
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"} !important;
+    }
+    
+    .rs-table-header-cell {
+      background: ${theme === "dark" ? "#1a1d24 !important" : "#f8f9fa !important"};
+      border: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"} !important;
+      color: ${theme === "dark" ? "#cbd5e0" : "#4a5568"} !important;
+      font-weight: 600 !important;
+    }
+    
+    .rs-table-row:hover .rs-table-cell {
+      background: ${theme === "dark" ? "#2d3748 !important" : "#f7fafc !important"} !important;
+    }
+    
+    .rs-table-row-selected .rs-table-cell {
+      background: ${theme === "dark" ? "#2a4365 !important" : "#ebf8ff !important"} !important;
+      border-color: ${theme === "dark" ? "#4299e1" : "#3182ce"} !important;
+    }
+    
+    /* Modal theming */
+    .modal-themed .rs-modal-content {
+      background: ${theme === "dark" ? "#1a1d24" : "#fff"};
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"};
+      border: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"};
+    }
+    
+    .modal-themed .rs-modal-header {
+      border-bottom: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"};
+      padding: 16px 20px;
+    }
+    
+    .modal-themed .rs-modal-body {
+      padding: 20px;
+    }
+    
+    .modal-themed .rs-modal-footer {
+      border-top: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"};
+      padding: 16px 20px;
+    }
+    
+    .modal-themed .rs-modal-title {
+      color: ${theme === "dark" ? "#fff" : "#2d3748"};
+      font-weight: 600;
+    }
+    
+    /* Input fields theming */
+    .modal-themed .rs-input,
+    .modal-themed .rs-picker-toggle {
+      background: ${theme === "dark" ? "#2d3748" : "#fff"};
+      border: 1px solid ${theme === "dark" ? "#4a5568" : "#e2e8f0"};
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"};
+    }
+    
+    .modal-themed .rs-input:focus,
+    .modal-themed .rs-picker-toggle-active {
+      border-color: ${theme === "dark" ? "#4299e1" : "#3182ce"};
+      box-shadow: 0 0 0 2px ${theme === "dark" ? "rgba(66, 153, 225, 0.3)" : "rgba(49, 130, 206, 0.3)"};
+    }
+    
+    .modal-themed .rs-form-control-label {
+      color: ${theme === "dark" ? "#cbd5e0" : "#4a5568"} !important;
+      font-weight: 500;
+    }
+    
+    /* Picker dropdown theming */
+    .rs-picker-menu,
+    .rs-checkbox-menu,
+    .rs-select-menu {
+      background: ${theme === "dark" ? "#1a1d24" : "#fff"} !important;
+      border: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"} !important;
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"} !important;
+    }
+    
+    .rs-picker-select-menu-item:hover,
+    .rs-check-item:hover {
+      background: ${theme === "dark" ? "#2d3748" : "#f7fafc"} !important;
+    }
+    
+    .rs-picker-select-menu-item.rs-picker-select-menu-item-active,
+    .rs-check-item.rs-check-item-checked {
+      background: ${theme === "dark" ? "#2a4365" : "#ebf8ff"} !important;
+      color: ${theme === "dark" ? "#90cdf4" : "#3182ce"} !important;
+    }
+    
+    /* Pagination theming */
+    .rs-pagination {
+      color: ${theme === "dark" ? "#cbd5e0" : "#718096"};
+    }
+    
+    .rs-pagination-btn {
+      color: ${theme === "dark" ? "#cbd5e0" : "#718096"} !important;
+      background: ${theme === "dark" ? "#2d3748" : "#fff"} !important;
+      border: 1px solid ${theme === "dark" ? "#4a5568" : "#e2e8f0"} !important;
+    }
+    
+    .rs-pagination-btn:hover {
+      background: ${theme === "dark" ? "#4a5568" : "#f7fafc"} !important;
+    }
+    
+    .rs-pagination-btn.rs-pagination-btn-active {
+      background: ${theme === "dark" ? "#4299e1" : "#3182ce"} !important;
+      color: white !important;
+      border-color: ${theme === "dark" ? "#4299e1" : "#3182ce"} !important;
+    }
+    
+    /* Accordion theming */
+    .rs-accordion {
+      background: ${theme === "dark" ? "#1a1d24" : "transparent"};
+      border: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"};
+    }
+    
+    .rs-accordion-item {
+      border-bottom: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"};
+    }
+    
+    .rs-accordion-item-active {
+      border-color: ${theme === "dark" ? "#4299e1" : "#3182ce"};
+    }
+    
+    .rs-accordion-toggle {
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"};
+      background: ${theme === "dark" ? "#1a1d24" : "#f8f9fa"};
+    }
+    
+    .rs-accordion-toggle:hover {
+      background: ${theme === "dark" ? "#2d3748" : "#edf2f7"};
+    }
+    
+    .rs-accordion-toggle.rs-accordion-toggle-focus {
+      box-shadow: 0 0 0 2px ${theme === "dark" ? "rgba(66, 153, 225, 0.3)" : "rgba(49, 130, 206, 0.3)"};
+    }
+    
+    /* Button theming */
+    .rs-btn-primary {
+      background: ${theme === "dark" ? "#4299e1" : "#3182ce"} !important;
+      border-color: ${theme === "dark" ? "#4299e1" : "#3182ce"} !important;
+    }
+    
+    .rs-btn-primary:hover {
+      background: ${theme === "dark" ? "#3182ce" : "#2c5282"} !important;
+      border-color: ${theme === "dark" ? "#3182ce" : "#2c5282"} !important;
+    }
+    
+    .rs-btn-subtle {
+      color: ${theme === "dark" ? "#cbd5e0" : "#718096"} !important;
+    }
+    
+    .rs-btn-subtle:hover {
+      background: ${theme === "dark" ? "#2d3748" : "#f7fafc"} !important;
+      color: ${theme === "dark" ? "#fff" : "#2d3748"} !important;
+    }
+    
+    /* Tag theming */
+    .rs-tag {
+      background: ${theme === "dark" ? "#2d3748" : "#f7fafc"};
+      border: 1px solid ${theme === "dark" ? "#4a5568" : "#e2e8f0"};
+      color: ${theme === "dark" ? "#cbd5e0" : "#4a5568"};
+    }
+    
+    .rs-tag-blue {
+      background: ${theme === "dark" ? "#2a4365" : "#ebf8ff"};
+      border-color: ${theme === "dark" ? "#4299e1" : "#90cdf4"};
+      color: ${theme === "dark" ? "#90cdf4" : "#3182ce"};
+    }
+    
+    .rs-tag-green {
+      background: ${theme === "dark" ? "#22543d" : "#f0fff4"};
+      border-color: ${theme === "dark" ? "#48bb78" : "#9ae6b4"};
+      color: ${theme === "dark" ? "#9ae6b4" : "#276749"};
+    }
+    
+    .rs-tag-cyan {
+      background: ${theme === "dark" ? "#234e52" : "#e6fffa"};
+      border-color: ${theme === "dark" ? "#38b2ac" : "#81e6d9"};
+      color: ${theme === "dark" ? "#81e6d9" : "#285e61"};
+    }
+    
+    /* Icon button theming */
+    .rs-btn-icon {
+      color: ${theme === "dark" ? "#cbd5e0" : "#718096"};
+    }
+    
+    .rs-btn-icon:hover {
+      background: ${theme === "dark" ? "#2d3748" : "#f7fafc"};
+      color: ${theme === "dark" ? "#fff" : "#2d3748"};
+    }
+    
+    .rs-btn-icon.rs-btn-icon-with-text {
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"};
+    }
+    
+    /* Checkbox theming */
+    .rs-checkbox-checker {
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"} !important;
+    }
+    
+    .rs-checkbox-checked .rs-checkbox-inner:before {
+      border-color: ${theme === "dark" ? "#4299e1" : "#3182ce"};
+      background: ${theme === "dark" ? "#4299e1" : "#3182ce"};
+    }
+    
+    /* Input group theming */
+    .rs-input-group {
+      background: ${theme === "dark" ? "#2d3748" : "#fff"};
+      border: 1px solid ${theme === "dark" ? "#4a5568" : "#e2e8f0"};
+    }
+    
+    .rs-input-group .rs-input {
+      background: transparent;
+      color: ${theme === "dark" ? "#e2e8f0" : "#2d3748"};
+    }
+    
+    .rs-input-group .rs-input::placeholder {
+      color: ${theme === "dark" ? "#a0aec0" : "#a0aec0"};
+    }
+    
+    .rs-input-group-addon {
+      background: ${theme === "dark" ? "#4a5568" : "#edf2f7"};
+      border-color: ${theme === "dark" ? "#4a5568" : "#e2e8f0"};
+      color: ${theme === "dark" ? "#cbd5e0" : "#718096"};
+    }
+    
+    .rs-input-group-btn .rs-btn {
+      background: ${theme === "dark" ? "#4a5568" : "#edf2f7"};
+      border-color: ${theme === "dark" ? "#4a5568" : "#e2e8f0"};
+      color: ${theme === "dark" ? "#cbd5e0" : "#718096"};
+    }
+    
+    .rs-input-group-btn .rs-btn:hover {
+      background: ${theme === "dark" ? "#718096" : "#e2e8f0"};
+    }
+    
+    /* Capitalize text */
+    .capitalize-text { text-transform: capitalize; }
+  `}</style>
 
       <Stack justifyContent="space-between" style={{ marginBottom: 20 }}>
         <Stack spacing={10}>
-          <h4 style={{ margin: 0, color: theme === "dark" ? "#fff" : "#222" }}>
+          <h4
+            style={{
+              margin: 0,
+              color: theme === "dark" ? "#fff" : "#2d3748",
+              fontWeight: 600,
+            }}
+          >
             {t("students")}
           </h4>
-          <Divider vertical />
-          <HStack color="cyan">
-            <PiStudentThin size={20} /> {totalStudents}
+          <Divider
+            vertical
+            style={{
+              backgroundColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+            }}
+          />
+          <HStack
+            spacing={6}
+            style={{
+              color: theme === "dark" ? "#90cdf4" : "#3182ce",
+              alignItems: "center",
+            }}
+          >
+            <PiStudentThin size={20} />
+            <span
+              style={{
+                fontWeight: 500,
+                color: theme === "dark" ? "#cbd5e0" : "#4a5568",
+              }}
+            >
+              {totalStudents}
+            </span>
           </HStack>
         </Stack>
 
@@ -377,14 +640,39 @@ function Group() {
             value={searchKeyword}
             onChange={setSearchKeyword}
             onPressEnter={triggerSearch}
+            style={{
+              backgroundColor: theme === "dark" ? "#2d3748" : "#fff",
+              color: theme === "dark" ? "#e2e8f0" : "#2d3748",
+              borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+            }}
           />
           {searchKeyword && (
-            <InputGroup.Button onClick={() => setSearchKeyword("")}>
-              <CloseOutlineIcon />
+            <InputGroup.Button
+              onClick={() => setSearchKeyword("")}
+              style={{
+                backgroundColor: theme === "dark" ? "#4a5568" : "#edf2f7",
+                borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+              }}
+            >
+              <CloseOutlineIcon
+                style={{
+                  color: theme === "dark" ? "#cbd5e0" : "#718096",
+                }}
+              />
             </InputGroup.Button>
           )}
-          <InputGroup.Button onClick={triggerSearch}>
-            <SearchIcon />
+          <InputGroup.Button
+            onClick={triggerSearch}
+            style={{
+              backgroundColor: theme === "dark" ? "#4a5568" : "#edf2f7",
+              borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+            }}
+          >
+            <SearchIcon
+              style={{
+                color: theme === "dark" ? "#90cdf4" : "#3182ce",
+              }}
+            />
           </InputGroup.Button>
         </InputGroup>
       </Stack>
@@ -392,33 +680,67 @@ function Group() {
       <Accordion
         bordered
         defaultActiveKey={1}
-        style={{ background: theme === "dark" ? "#0F131A" : "transparent" }}
+        style={{
+          background: theme === "dark" ? "#1a1d24" : "#fff",
+          borderColor: theme === "dark" ? "#2d3748" : "#e2e8f0",
+          borderRadius: "8px",
+          overflow: "hidden",
+        }}
       >
         <Accordion.Panel
           header={
-            <Stack spacing={15}>
+            <Stack spacing={15} style={{ padding: "12px 16px" }}>
               <span
                 style={{
                   fontWeight: 700,
                   fontSize: "1.1rem",
-                  color: theme === "dark" ? "#fff" : "#111",
+                  color: theme === "dark" ? "#fff" : "#2d3748",
                 }}
               >
                 {groupData?.groupName || "---"}
               </span>
-              <Tag color="blue" variant="filled">
+              <Tag
+                color="blue"
+                variant="filled"
+                style={{
+                  backgroundColor: theme === "dark" ? "#2a4365" : "#ebf8ff",
+                  borderColor: theme === "dark" ? "#4299e1" : "#90cdf4",
+                  color: theme === "dark" ? "#90cdf4" : "#3182ce",
+                  fontWeight: 500,
+                }}
+              >
                 {groupData?.lessonTime}
               </Tag>
               {groupData?.days?.includes("Everyday") && (
-                <Tag color="green">{t("Everyday")}</Tag>
+                <Tag
+                  color="green"
+                  style={{
+                    backgroundColor: theme === "dark" ? "#22543d" : "#f0fff4",
+                    borderColor: theme === "dark" ? "#48bb78" : "#9ae6b4",
+                    color: theme === "dark" ? "#9ae6b4" : "#276749",
+                    fontWeight: 500,
+                  }}
+                >
+                  {t("Everyday")}
+                </Tag>
               )}
             </Stack>
           }
           bodyFill
         >
-          <Table height={450} data={students} loading={loading} cellBordered>
+          <Table
+            height={450}
+            data={students}
+            loading={loading}
+            cellBordered
+            rowHeight={60}
+            headerHeight={50}
+            style={{
+              backgroundColor: theme === "dark" ? "#1b212b" : "#fff",
+            }}
+          >
             <Column width={50} align="center" fixed>
-              <HeaderCell>{""}</HeaderCell>
+              <HeaderCell></HeaderCell>
               <Cell>
                 {(rowData) => (
                   <Checkbox
@@ -426,25 +748,66 @@ function Group() {
                     onChange={(v, checked) =>
                       setSelectedId(checked ? rowData.id : null)
                     }
+                    style={{
+                      color: theme === "dark" ? "#e2e8f0" : "#2d3748",
+                    }}
                   />
                 )}
               </Cell>
             </Column>
             <Column width={60} align="center">
               <HeaderCell>№</HeaderCell>
-              <Cell>{(r, i) => (activePage - 1) * displayLimit + i + 1}</Cell>
+              <Cell>
+                {(r, i) => (
+                  <span
+                    style={{
+                      color: theme === "dark" ? "#cbd5e0" : "#718096",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {(activePage - 1) * displayLimit + i + 1}
+                  </span>
+                )}
+              </Cell>
             </Column>
             <Column width={180}>
               <HeaderCell>{t("Student name")}</HeaderCell>
-              <Cell className="capitalize-text" dataKey="studentName" />
+              <Cell className="capitalize-text" dataKey="studentName">
+                {(rowData) => (
+                  <span
+                    style={{ color: theme === "dark" ? "#e2e8f0" : "#2d3748" }}
+                  >
+                    {rowData.studentName}
+                  </span>
+                )}
+              </Cell>
             </Column>
             <Column width={180}>
               <HeaderCell>{t("Student lastName")}</HeaderCell>
-              <Cell className="capitalize-text" dataKey="lastName" />
+              <Cell className="capitalize-text" dataKey="lastName">
+                {(rowData) => (
+                  <span
+                    style={{ color: theme === "dark" ? "#e2e8f0" : "#2d3748" }}
+                  >
+                    {rowData.lastName}
+                  </span>
+                )}
+              </Cell>
             </Column>
             <Column width={160}>
               <HeaderCell>{t("phone")}</HeaderCell>
-              <Cell>{(r) => `+998 ${r.phoneNumber}`}</Cell>
+              <Cell>
+                {(r) => (
+                  <span
+                    style={{
+                      color: theme === "dark" ? "#90cdf4" : "#3182ce",
+                      fontWeight: 500,
+                    }}
+                  >
+                    +998 {r.phoneNumber}
+                  </span>
+                )}
+              </Cell>
             </Column>
             <Column width={120} fixed="right">
               <HeaderCell>{t("actions")}</HeaderCell>
@@ -458,6 +821,12 @@ function Group() {
                         appearance="subtle"
                         icon={<EditIcon />}
                         onClick={() => handleEditOpen(rowData)}
+                        style={{
+                          color: theme === "dark" ? "#90cdf4" : "#3182ce",
+                          backgroundColor:
+                            theme === "dark" ? "#2a4365" : "#ebf8ff",
+                          border: `1px solid ${theme === "dark" ? "#4299e1" : "#90cdf4"}`,
+                        }}
                       />
                       <IconButton
                         size="sm"
@@ -465,6 +834,12 @@ function Group() {
                         appearance="subtle"
                         icon={<TrashIcon />}
                         onClick={() => setShowDeleteModal(true)}
+                        style={{
+                          color: theme === "dark" ? "#fc8181" : "#e53e3e",
+                          backgroundColor:
+                            theme === "dark" ? "#742a2a" : "#fed7d7",
+                          border: `1px solid ${theme === "dark" ? "#f56565" : "#fc8181"}`,
+                        }}
                       />
                     </Stack>
                   )
@@ -477,12 +852,33 @@ function Group() {
                 {(rowData) => (
                   <TagGroup>
                     {rowData.days.includes("Everyday") ? (
-                      <Tag color="green" variant="filled">
+                      <Tag
+                        color="green"
+                        variant="filled"
+                        style={{
+                          backgroundColor:
+                            theme === "dark" ? "#22543d" : "#f0fff4",
+                          borderColor: theme === "dark" ? "#48bb78" : "#9ae6b4",
+                          color: theme === "dark" ? "#9ae6b4" : "#276749",
+                        }}
+                      >
                         {t("Everyday")}
                       </Tag>
                     ) : (
                       rowData.days.map((day) => (
-                        <Tag key={day} color="cyan">
+                        <Tag
+                          key={day}
+                          color="cyan"
+                          style={{
+                            backgroundColor:
+                              theme === "dark" ? "#234e52" : "#e6fffa",
+                            borderColor:
+                              theme === "dark" ? "#38b2ac" : "#81e6d9",
+                            color: theme === "dark" ? "#81e6d9" : "#285e61",
+                            marginRight: 4,
+                            marginBottom: 4,
+                          }}
+                        >
                           {t(day)}
                         </Tag>
                       ))
@@ -492,7 +888,13 @@ function Group() {
               </Cell>
             </Column>
           </Table>
-          <div style={{ padding: 20 }}>
+          <div
+            style={{
+              padding: 20,
+              backgroundColor: theme === "dark" ? "#1a1d24" : "#fff",
+              borderTop: `1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"}`,
+            }}
+          >
             <Pagination
               total={totalStudents}
               limit={displayLimit}
@@ -500,6 +902,15 @@ function Group() {
               onChangePage={(p) => {
                 setActivePage(p);
                 loadData(p);
+              }}
+              prev
+              next
+              first
+              last
+              ellipsis
+              boundaryLinks
+              style={{
+                color: theme === "dark" ? "#cbd5e0" : "#718096",
               }}
             />
           </div>
@@ -511,6 +922,7 @@ function Group() {
         onClose={() => setShowEditModal(false)}
         size="md"
         className="modal-themed"
+        backdrop={true}
       >
         <Modal.Header>
           <Modal.Title>{t("edit_student_title")}</Modal.Title>
@@ -522,7 +934,14 @@ function Group() {
                 <Col xs={12}>
                   <Form.Group>
                     <Form.ControlLabel>{t("Student name")}</Form.ControlLabel>
-                    <Form.Control name="studentName" />
+                    <Form.Control
+                      name="studentName"
+                      style={{
+                        backgroundColor: theme === "dark" ? "#2d3748" : "#fff",
+                        color: theme === "dark" ? "#e2e8f0" : "#2d3748",
+                        borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+                      }}
+                    />
                   </Form.Group>
                 </Col>
                 <Col xs={12}>
@@ -530,7 +949,14 @@ function Group() {
                     <Form.ControlLabel>
                       {t("Student lastName")}
                     </Form.ControlLabel>
-                    <Form.Control name="lastName" />
+                    <Form.Control
+                      name="lastName"
+                      style={{
+                        backgroundColor: theme === "dark" ? "#2d3748" : "#fff",
+                        color: theme === "dark" ? "#e2e8f0" : "#2d3748",
+                        borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+                      }}
+                    />
                   </Form.Group>
                 </Col>
               </Row>
@@ -540,7 +966,14 @@ function Group() {
                     <Form.ControlLabel>
                       {t("Student phoneNumber")}
                     </Form.ControlLabel>
-                    <Form.Control name="phoneNumber" />
+                    <Form.Control
+                      name="phoneNumber"
+                      style={{
+                        backgroundColor: theme === "dark" ? "#2d3748" : "#fff",
+                        color: theme === "dark" ? "#e2e8f0" : "#2d3748",
+                        borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+                      }}
+                    />
                   </Form.Group>
                 </Col>
                 <Col xs={12}>
@@ -555,6 +988,11 @@ function Group() {
                       loading={groupSearchLoading}
                       onSearch={fetchAllGroups}
                       onOpen={() => fetchAllGroups("")}
+                      style={{
+                        backgroundColor: theme === "dark" ? "#2d3748" : "#fff",
+                        color: theme === "dark" ? "#e2e8f0" : "#2d3748",
+                        borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+                      }}
                     />
                   </Form.Group>
                 </Col>
@@ -569,6 +1007,11 @@ function Group() {
                       data={weekDaysOptions}
                       block
                       placeholder={t("Select week days")}
+                      style={{
+                        backgroundColor: theme === "dark" ? "#2d3748" : "#fff",
+                        color: theme === "dark" ? "#e2e8f0" : "#2d3748",
+                        borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
+                      }}
                     />
                   </Form.Group>
                 </Col>
@@ -585,7 +1028,13 @@ function Group() {
           >
             {t("Save")}
           </Button>
-          <Button onClick={() => setShowEditModal(false)} appearance="subtle">
+          <Button
+            onClick={() => setShowEditModal(false)}
+            appearance="subtle"
+            style={{
+              color: theme === "dark" ? "#cbd5e0" : "#718096",
+            }}
+          >
             {t("Cancel")}
           </Button>
         </Modal.Footer>
@@ -600,9 +1049,28 @@ function Group() {
         className="modal-themed"
       >
         <Modal.Body style={{ textAlign: "center" }}>
-          <RemindIcon style={{ color: "#ffb300", fontSize: 54 }} />
-          <h4 style={{ marginTop: 20 }}>{t("delete_confirm_title")}</h4>
-          <p style={{ opacity: 0.7 }}>{t("delete_confirm_desc")}</p>
+          <RemindIcon
+            style={{
+              color: theme === "dark" ? "#f6ad55" : "#dd6b20",
+              fontSize: 54,
+            }}
+          />
+          <h4
+            style={{
+              marginTop: 20,
+              color: theme === "dark" ? "#fff" : "#2d3748",
+            }}
+          >
+            {t("delete_confirm_title")}
+          </h4>
+          <p
+            style={{
+              opacity: 0.7,
+              color: theme === "dark" ? "#cbd5e0" : "#718096",
+            }}
+          >
+            {t("delete_confirm_desc")}
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button
@@ -610,10 +1078,20 @@ function Group() {
             color="red"
             appearance="primary"
             loading={loading}
+            style={{
+              backgroundColor: theme === "dark" ? "#c53030" : "#e53e3e",
+              borderColor: theme === "dark" ? "#c53030" : "#e53e3e",
+            }}
           >
             {t("delete_button")}
           </Button>
-          <Button onClick={() => setShowDeleteModal(false)} appearance="subtle">
+          <Button
+            onClick={() => setShowDeleteModal(false)}
+            appearance="subtle"
+            style={{
+              color: theme === "dark" ? "#cbd5e0" : "#718096",
+            }}
+          >
             {t("Cancel")}
           </Button>
         </Modal.Footer>
