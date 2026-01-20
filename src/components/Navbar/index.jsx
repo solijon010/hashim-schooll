@@ -92,9 +92,7 @@ function SiteNavbar({ setExpanded }) {
   const isMobile = useIsMobile(768);
   const [open, setOpen] = useState(false);
 
-  // ✅ Drawer ochilganda orqa fon blur bo‘lishi uchun
-  // Layout/content wrapperingizga id qo‘ying: id="app-content"
-  // (agar sizda yo‘q bo‘lsa, hozircha root deb turing)
+ 
   useEffect(() => {
     const el =
       document.getElementById("app-content") || document.getElementById("root");
@@ -133,7 +131,7 @@ function SiteNavbar({ setExpanded }) {
         <Button
           appearance={inDrawer ? "ghost" : "subtle"}
           onClick={() => {
-            setExpanded?.((prev) => !prev); // ✅ sidebar ishlayveradi
+            setExpanded?.((prev) => !prev); 
             if (inDrawer) setOpen(false);
           }}
           style={iconBtnStyle}
@@ -172,7 +170,7 @@ function SiteNavbar({ setExpanded }) {
         speaker={<Tooltip>{t("Change language")}</Tooltip>}
       >
         <Dropdown
-          className="lang-dd" // ✅ shu yetadi
+          className="lang-dd" 
           placement={inDrawer ? "bottomStart" : "bottomEnd"}
           renderToggle={(props, ref) => (
             <Button
@@ -184,7 +182,7 @@ function SiteNavbar({ setExpanded }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                padding: "8px 12px", // ✅ toggle kattaligi
+                padding: "8px 12px", 
                 minHeight: 34,
                 fontSize: 16,
                 border:
@@ -242,13 +240,13 @@ function SiteNavbar({ setExpanded }) {
           <Brand theme={theme} isMobile={isMobile} />
         </Navbar.Content>
 
-        {/* ✅ Desktop: hammasi ko‘rinadi */}
+     
         {!isMobile ? (
           <Navbar.Content justify="end">
             <Controls />
           </Navbar.Content>
         ) : (
-          // ✅ Mobile: burger chiqadi
+         
           <Navbar.Content justify="end">
             <Button
               appearance="subtle"
@@ -262,14 +260,14 @@ function SiteNavbar({ setExpanded }) {
         )}
       </Navbar>
 
-      {/* ✅ Modal Drawer + blur + backdrop */}
+
       <Drawer
         open={open}
         onClose={() => setOpen(false)}
         placement="right"
         size="xs"
-        backdrop={true} // ✅ modalga o‘xshab orqasi qorayadi
-        keyboard // ✅ ESC bilan yopiladi
+        backdrop={true} 
+        keyboard 
       >
         <Drawer.Header>
           <Drawer.Title
