@@ -98,10 +98,10 @@ function SidebarItems() {
         title={t("Payments")}
         icon={<MdPayment size={15} />}
       >
-        <Nav.Item eventKey="3-1">Geo</Nav.Item>
-        <Nav.Item eventKey="3-2">Devices</Nav.Item>
-        <Nav.Item eventKey="3-3">Loyalty</Nav.Item>
-        <Nav.Item eventKey="3-4">Visit Depth</Nav.Item>
+        <Nav.Item eventKey="3-1">{t("Geo")}</Nav.Item>
+        <Nav.Item eventKey="3-2">{t("Devices")}</Nav.Item>
+        <Nav.Item eventKey="3-3">{t("Loyalty")}</Nav.Item>
+        <Nav.Item eventKey="3-4">{t("Visit Depth")}</Nav.Item>
       </Nav.Menu>
     </Nav>
   );

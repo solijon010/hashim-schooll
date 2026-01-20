@@ -42,6 +42,9 @@ const MainLayout = () => {
         minHeight: "100vh",
         background: theme === "light" ? "#fff" : "#00000044",
         padding: "10px",
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        gap: isMobile ? 10 : 0,
       }}
     >
       {/*create group modal */}
@@ -51,97 +54,201 @@ const MainLayout = () => {
         setStudentModal={setStudentModal}
         studentModal={studentModal}
       />
-      {/* Sidebar qismi */}
-      <Sidebar
-        width={isExpanded ? 260 : 56}
-        collapsible
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          transition: "all 0.3s",
-          background: theme === "light" ? "#FAFAFA" : "#0F131A",
-          borderRadius: "5px",
-          position: "sticky",
-          top: "10px",
-          height: isMobile ? "calc(100vh - 20px)" : "calc(100vh - 20px)",
-          border: theme === "light" ? "1px solid #E4E4E7" : "1px solid #2a2c31",
-        }}
-      >
-        <Sidenav expanded={isExpanded} h="100%" appearance="subtle">
-          <Sidenav.Header>
-            {/* sidebar Nav */}
-            <SidebarNav expanded={isExpanded} />
-          </Sidenav.Header>
-          <Sidenav.Body>
-            {isExpanded && (
-              <HStack
-                pl={15}
-                py={7}
-                borderBottom={
-                  theme === "light" ? "1px solid #e9ebf0" : "1px solid #2a2c31"
-                }
-                color={theme === "light" ? "#a4a9b3" : "#cbced4"}
-              >
-                {t("Pages")}
-              </HStack>
-            )}
-
-            {/* sidebar Items */}
-            <SidebarItems isExpanded={isExpanded} />
-          </Sidenav.Body>
-          <Sidenav.Footer
-            style={{
-              display: "flex",
-              justifyContent: isExpanded ? "end" : "center",
-            }}
-          >
-            <Whisper
-              placement={isExpanded ? "topEnd" : "topStart"}
-              trigger="click"
-              speaker={(props, ref) => (
-                <SidebarMenu
-                  {...props}
-                  ref={ref}
-                  setOpen={setOpen}
-                  setStudentModal={setStudentModal}
-                />
-              )}
-            >
-              <button className="rounded-full bg-primary text-white p-3 cursor-pointer group">
-                <FaPlus
-                  size={20}
-                  className="transition-transform duration-200 ease-linear group-hover:rotate-180"
-                />
-              </button>
-            </Whisper>
-          </Sidenav.Footer>
-        </Sidenav>
-      </Sidebar>
-      <Container>
-        <Header
-          style={{
-            padding: "0px 8px",
-            position: "sticky",
-            top: "10px",
-            zIndex: "100",
-          }}
-        >
-          {/* Navbar */}
-          <SiteNavbar setExpanded={setExpanded} />
-        </Header>
-        {/* Asosiy Kontent */}
-        <Center>
-          <Content style={{ padding: "15px 15px 0 15px" }}>
-            <div
+      {isMobile ? (
+        <>
+          <Container>
+            <Header
               style={{
-                padding: isMobile ? "0" : "20px",
+                padding: "0px 8px",
+                position: "sticky",
+                top: "10px",
+                zIndex: "100",
               }}
             >
-              <Outlet />
-            </div>
-          </Content>
-        </Center>
-      </Container>
+              {/* Navbar */}
+              <SiteNavbar setExpanded={setExpanded} />
+            </Header>
+            {/* Asosiy Kontent */}
+            <Center>
+              <Content style={{ padding: "15px 15px 0 15px" }}>
+                <div
+                  style={{
+                    padding: isMobile ? "0" : "20px",
+                  }}
+                >
+                  <Outlet />
+                </div>
+              </Content>
+            </Center>
+          </Container>
+          {/* Sidebar qismi */}
+          <Sidebar
+            width="100%"
+            collapsible
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              transition: "all 0.3s",
+              background: theme === "light" ? "#FAFAFA" : "#0F131A",
+              borderRadius: "5px",
+              position: "static",
+              height: "auto",
+              width: "100%",
+              border:
+                theme === "light" ? "1px solid #E4E4E7" : "1px solid #2a2c31",
+            }}
+          >
+            <Sidenav expanded={isExpanded} h="100%" appearance="subtle">
+              <Sidenav.Header>
+                {/* sidebar Nav */}
+                <SidebarNav expanded={isExpanded} />
+              </Sidenav.Header>
+              <Sidenav.Body>
+                {isExpanded && (
+                  <HStack
+                    pl={15}
+                    py={7}
+                    borderBottom={
+                      theme === "light"
+                        ? "1px solid #e9ebf0"
+                        : "1px solid #2a2c31"
+                    }
+                    color={theme === "light" ? "#a4a9b3" : "#cbced4"}
+                  >
+                    {t("Pages")}
+                  </HStack>
+                )}
+
+                {/* sidebar Items */}
+                <SidebarItems isExpanded={isExpanded} />
+              </Sidenav.Body>
+              <Sidenav.Footer
+                style={{
+                  display: "flex",
+                  justifyContent: isExpanded ? "end" : "center",
+                }}
+              >
+                <Whisper
+                  placement={isExpanded ? "topEnd" : "topStart"}
+                  trigger="click"
+                  speaker={(props, ref) => (
+                    <SidebarMenu
+                      {...props}
+                      ref={ref}
+                      setOpen={setOpen}
+                      setStudentModal={setStudentModal}
+                    />
+                  )}
+                >
+                  <button className="rounded-full bg-primary text-white p-3 cursor-pointer group">
+                    <FaPlus
+                      size={20}
+                      className="transition-transform duration-200 ease-linear group-hover:rotate-180"
+                    />
+                  </button>
+                </Whisper>
+              </Sidenav.Footer>
+            </Sidenav>
+          </Sidebar>
+        </>
+      ) : (
+        <>
+          {/* Sidebar qismi */}
+          <Sidebar
+            width={isExpanded ? 260 : 56}
+            collapsible
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              transition: "all 0.3s",
+              background: theme === "light" ? "#FAFAFA" : "#0F131A",
+              borderRadius: "5px",
+              position: "sticky",
+              top: "10px",
+              height: "calc(100vh - 20px)",
+              border:
+                theme === "light" ? "1px solid #E4E4E7" : "1px solid #2a2c31",
+            }}
+          >
+            <Sidenav expanded={isExpanded} h="100%" appearance="subtle">
+              <Sidenav.Header>
+                {/* sidebar Nav */}
+                <SidebarNav expanded={isExpanded} />
+              </Sidenav.Header>
+              <Sidenav.Body>
+                {isExpanded && (
+                  <HStack
+                    pl={15}
+                    py={7}
+                    borderBottom={
+                      theme === "light"
+                        ? "1px solid #e9ebf0"
+                        : "1px solid #2a2c31"
+                    }
+                    color={theme === "light" ? "#a4a9b3" : "#cbced4"}
+                  >
+                    {t("Pages")}
+                  </HStack>
+                )}
+
+                {/* sidebar Items */}
+                <SidebarItems isExpanded={isExpanded} />
+              </Sidenav.Body>
+              <Sidenav.Footer
+                style={{
+                  display: "flex",
+                  justifyContent: isExpanded ? "end" : "center",
+                }}
+              >
+                <Whisper
+                  placement={isExpanded ? "topEnd" : "topStart"}
+                  trigger="click"
+                  speaker={(props, ref) => (
+                    <SidebarMenu
+                      {...props}
+                      ref={ref}
+                      setOpen={setOpen}
+                      setStudentModal={setStudentModal}
+                    />
+                  )}
+                >
+                  <button className="rounded-full bg-primary text-white p-3 cursor-pointer group">
+                    <FaPlus
+                      size={20}
+                      className="transition-transform duration-200 ease-linear group-hover:rotate-180"
+                    />
+                  </button>
+                </Whisper>
+              </Sidenav.Footer>
+            </Sidenav>
+          </Sidebar>
+          <Container>
+            <Header
+              style={{
+                padding: "0px 8px",
+                position: "sticky",
+                top: "10px",
+                zIndex: "100",
+              }}
+            >
+              {/* Navbar */}
+              <SiteNavbar setExpanded={setExpanded} />
+            </Header>
+            {/* Asosiy Kontent */}
+            <Center>
+              <Content style={{ padding: "15px 15px 0 15px" }}>
+                <div
+                  style={{
+                    padding: isMobile ? "0" : "20px",
+                  }}
+                >
+                  <Outlet />
+                </div>
+              </Content>
+            </Center>
+          </Container>
+        </>
+      )}
     </Container>
   );
 };
