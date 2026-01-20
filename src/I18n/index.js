@@ -81,6 +81,7 @@ const resources = {
       student_deleted_successfully: "Student record deleted successfully",
       error_deleting_student: "Error occurred while deleting",
       error_occurred: "An unexpected error occurred",
+      "Mark attendance": "Mark attendance",
     },
   },
 
@@ -164,6 +165,7 @@ const resources = {
       student_deleted_successfully: "O'quvchi muvaffaqiyatli o'chirildi",
       error_deleting_student: "O'chirishda xatolik yuz berdi",
       error_occurred: "Kutilmagan xatolik yuz berdi",
+      "Mark attendance": "Davomat qlish",
     },
   },
 
@@ -246,6 +248,7 @@ const resources = {
       student_deleted_successfully: "Студент успешно удалён",
       error_deleting_student: "Ошибка при удалении студента",
       error_occurred: "Произошла непредвиденная ошибка",
+      "Mark attendance": "Mark attendance",
     },
   },
 };

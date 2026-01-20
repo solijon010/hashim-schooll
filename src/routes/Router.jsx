@@ -4,9 +4,7 @@ import MainLayout from "../layouts/MainLayout";
 import { DashboardLoading, PageNotFound } from "../components";
 import Group from "../pages/Group";
 const AttendanceHistory = lazy(() => import("../pages/AttendanceHistory"));
-const AttendanceStatistics = lazy(() =>
-  import("../pages/AttendanceStatistics")
-);
+const MarkAttendance = lazy(() => import("../pages/MarkAttendance"));
 const DailyAttendance = lazy(() => import("../pages/DailyAttendance"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 function Router() {
@@ -32,8 +30,8 @@ function Router() {
           element: <AttendanceHistory />,
         },
         {
-          path: "/attendanceStatistics",
-          element: <AttendanceStatistics />,
+          path: "/markAttendance",
+          element: <MarkAttendance />,
         },
         {
           path: "/group/:id",
