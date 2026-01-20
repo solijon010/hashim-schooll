@@ -598,7 +598,11 @@ function Group() {
     .capitalize-text { text-transform: capitalize; }
   `}</style>
 
-      <Stack justifyContent="space-between" style={{ marginBottom: 20 }}>
+      <Stack
+        justifyContent="space-between"
+        style={{ marginBottom: 20 }}
+        className="group-toolbar"
+      >
         <Stack spacing={10}>
           <h4
             style={{
@@ -634,7 +638,7 @@ function Group() {
           </HStack>
         </Stack>
 
-        <InputGroup inside style={{ width: 300 }}>
+        <InputGroup inside style={{ width: 300 }} className="group-search">
           <Input
             placeholder={t("search_placeholder")}
             value={searchKeyword}

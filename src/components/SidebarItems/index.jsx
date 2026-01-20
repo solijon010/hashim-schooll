@@ -11,10 +11,14 @@ import { PiClipboardText } from "react-icons/pi";
 import { useSelector } from "react-redux";
 import React from "react";
 
-function SidebarItems() {
+function SidebarItems({ isExpanded, mobileBottom = false }) {
   const location = useLocation();
   const { t } = useTranslation();
   const theme = useSelector((state) => state.theme.value);
+  const menuPlacement = mobileBottom ? "topStart" : "rightStart";
+  const menuStyle = mobileBottom
+    ? { bottom: "calc(100% + 8px)", top: "auto" }
+    : undefined;
 
   const groups = useSelector((state) => state.groups.items);
 
@@ -32,6 +36,8 @@ function SidebarItems() {
         eventKey="/groups"
         title={t("Groups")}
         icon={<PeoplesIcon size={15} />}
+        placement={menuPlacement}
+        menuStyle={menuStyle}
       >
         {groups.map((group) => (
           <Nav.Item
@@ -70,6 +76,8 @@ function SidebarItems() {
         eventKey="/attendance"
         title={t("Attendance")}
         icon={<PiClipboardText size={15} />}
+        placement={menuPlacement}
+        menuStyle={menuStyle}
       >
         <Nav.Item
           eventKey="/dailyAttendancet"
@@ -97,6 +105,8 @@ function SidebarItems() {
         eventKey="/payments"
         title={t("Payments")}
         icon={<MdPayment size={15} />}
+        placement={menuPlacement}
+        menuStyle={menuStyle}
       >
         <Nav.Item eventKey="3-1">{t("Geo")}</Nav.Item>
         <Nav.Item eventKey="3-2">{t("Devices")}</Nav.Item>
