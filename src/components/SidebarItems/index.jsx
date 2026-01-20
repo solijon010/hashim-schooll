@@ -86,11 +86,11 @@ function SidebarItems() {
           {t("Attendance History")}
         </Nav.Item>
         <Nav.Item
-          eventKey="/attendanceStatistics"
+          eventKey="/markAttendance"
           as={NavLink}
-          to={"/attendanceStatistics"}
+          to={"/markAttendance"}
         >
-          {t("Attendance  Statistics")}
+          {t("Mark attendance")}
         </Nav.Item>
       </Nav.Menu>
       <Nav.Menu
