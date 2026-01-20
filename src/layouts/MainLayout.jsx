@@ -74,6 +74,7 @@ const MainLayout = () => {
                 <div
                   style={{
                     padding: isMobile ? "0" : "20px",
+                    paddingBottom: isMobile ? "140px" : undefined,
                   }}
                 >
                   <Outlet />
@@ -90,64 +91,41 @@ const MainLayout = () => {
               flexDirection: "column",
               transition: "all 0.3s",
               background: theme === "light" ? "#FAFAFA" : "#0F131A",
-              borderRadius: "5px",
-              position: "static",
+              borderRadius: "0",
+              position: "fixed",
+              bottom: "10px",
+              left: "0",
+              right: "0",
               height: "auto",
               width: "100%",
               border:
                 theme === "light" ? "1px solid #E4E4E7" : "1px solid #2a2c31",
             }}
+            className="mobile-bottom-sidebar"
           >
-            <Sidenav expanded={isExpanded} h="100%" appearance="subtle">
-              <Sidenav.Header>
-                {/* sidebar Nav */}
-                <SidebarNav expanded={isExpanded} />
-              </Sidenav.Header>
+            <Sidenav expanded={true} h="100%" appearance="subtle">
               <Sidenav.Body>
-                {isExpanded && (
-                  <HStack
-                    pl={15}
-                    py={7}
-                    borderBottom={
-                      theme === "light"
-                        ? "1px solid #e9ebf0"
-                        : "1px solid #2a2c31"
-                    }
-                    color={theme === "light" ? "#a4a9b3" : "#cbced4"}
+                <div className="mobile-bottom-row">
+                  {/* sidebar Items */}
+                  <SidebarItems isExpanded={false} mobileBottom />
+                  <Whisper
+                    placement="topEnd"
+                    trigger="click"
+                    speaker={(props, ref) => (
+                      <SidebarMenu
+                        {...props}
+                        ref={ref}
+                        setOpen={setOpen}
+                        setStudentModal={setStudentModal}
+                      />
+                    )}
                   >
-                    {t("Pages")}
-                  </HStack>
-                )}
-
-                {/* sidebar Items */}
-                <SidebarItems isExpanded={isExpanded} />
+                    <button className="mobile-bottom-plus">
+                      <FaPlus size={20} />
+                    </button>
+                  </Whisper>
+                </div>
               </Sidenav.Body>
-              <Sidenav.Footer
-                style={{
-                  display: "flex",
-                  justifyContent: isExpanded ? "end" : "center",
-                }}
-              >
-                <Whisper
-                  placement={isExpanded ? "topEnd" : "topStart"}
-                  trigger="click"
-                  speaker={(props, ref) => (
-                    <SidebarMenu
-                      {...props}
-                      ref={ref}
-                      setOpen={setOpen}
-                      setStudentModal={setStudentModal}
-                    />
-                  )}
-                >
-                  <button className="rounded-full bg-primary text-white p-3 cursor-pointer group">
-                    <FaPlus
-                      size={20}
-                      className="transition-transform duration-200 ease-linear group-hover:rotate-180"
-                    />
-                  </button>
-                </Whisper>
-              </Sidenav.Footer>
             </Sidenav>
           </Sidebar>
         </>
