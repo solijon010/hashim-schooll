@@ -9,3 +9,39 @@ body {
   font-weight: 500;
   color: #343434;
 }
+
+.app-blur {
+  filter: blur(4px);
+  transform: scale(0.995);
+  transition:
+    filter 200ms ease,
+    transform 200ms ease;
+}
+
+.rs-drawer-open .app-blur {
+  pointer-events: none;
+  user-select: none;
+}
+
+.lang-dd .rs-dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-items: center;
+  min-width: 110px;
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.lang-dd .rs-dropdown-item,
+.lang-dd .rs-dropdown-item-content {
+  font-size: 16px;
+}
+
+.lang-dd .rs-dropdown-item {
+  padding: 12px 16px !important;
+}
+
+.lang-dd .rs-dropdown-item:hover {
+  background: rgba(46, 49, 146, 0.08);
+}
