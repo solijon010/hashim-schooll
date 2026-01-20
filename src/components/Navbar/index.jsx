@@ -8,17 +8,21 @@ import {
   Whisper,
   Dropdown,
   Drawer,
+  Input,
+  Toggle,
 } from "rsuite";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TbLayoutSidebar } from "react-icons/tb";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { CiLight } from "react-icons/ci";
-import { FiMenu } from "react-icons/fi";
+import { FiEdit2, FiMenu } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { changeTheme } from "../../createSlice/ThemeSlice";
 import { changeLanguage } from "../../createSlice/ChangeLanguage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../firebase/firebase";
 
 const LANGS = [
   { code: "en", img: "/flags/en.png" },
@@ -88,9 +92,20 @@ function SiteNavbar({ setExpanded }) {
   const lang = useSelector((state) => state.language.value);
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const defaultAvatar = "https://i.pravatar.cc/150?u=19";
 
   const isMobile = useIsMobile(768);
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState(defaultAvatar);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [loginId, setLoginId] = useState("37363");
+  const [password, setPassword] = useState("********");
+  const [notificationsOn, setNotificationsOn] = useState(true);
+  const [editingLogin, setEditingLogin] = useState(false);
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [editingNotifications, setEditingNotifications] = useState(false);
 
  
   useEffect(() => {
@@ -98,11 +113,20 @@ function SiteNavbar({ setExpanded }) {
       document.getElementById("app-content") || document.getElementById("root");
     if (!el) return;
 
-    if (open) el.classList.add("app-blur");
+    if (menuOpen || settingsOpen) el.classList.add("app-blur");
     else el.classList.remove("app-blur");
 
     return () => el.classList.remove("app-blur");
-  }, [open]);
+  }, [menuOpen, settingsOpen]);
+
+  useEffect(() => {
+    const savedAvatar = localStorage.getItem("settings.avatar");
+    if (savedAvatar && savedAvatar !== "null" && savedAvatar !== "undefined") {
+      setAvatarSrc(savedAvatar);
+    } else {
+      setAvatarSrc(defaultAvatar);
+    }
+  }, [defaultAvatar]);
 
   const currentLang = useMemo(
     () => LANGS.find((l) => l.code === lang) || LANGS[0],
@@ -122,7 +146,15 @@ function SiteNavbar({ setExpanded }) {
   };
 
   const Controls = ({ inDrawer = false }) => (
-    <HStack spacing={8} style={{ alignItems: "center", flexWrap: "wrap" }}>
+    <HStack
+      spacing={8}
+      className={inDrawer ? "drawer-controls" : undefined}
+      style={{
+        alignItems: "center",
+        flexWrap: inDrawer ? "nowrap" : "wrap",
+        width: inDrawer ? "100%" : "auto",
+      }}
+    >
       <Whisper
         placement="bottom"
         trigger="hover"
@@ -131,8 +163,8 @@ function SiteNavbar({ setExpanded }) {
         <Button
           appearance={inDrawer ? "ghost" : "subtle"}
           onClick={() => {
-            setExpanded?.((prev) => !prev); 
-            if (inDrawer) setOpen(false);
+            setExpanded?.((prev) => !prev);
+            if (inDrawer) setMenuOpen(false);
           }}
           style={iconBtnStyle}
         >
@@ -217,7 +249,15 @@ function SiteNavbar({ setExpanded }) {
         </Dropdown>
       </Whisper>
 
-      <Avatar src="https://i.pravatar.cc/150?u=19" circle size="md" />
+      <Button
+        appearance={inDrawer ? "ghost" : "subtle"}
+        onClick={() => setSettingsOpen(true)}
+        className={inDrawer ? "drawer-avatar-btn" : undefined}
+        style={{ ...iconBtnStyle, padding: 4 }}
+        aria-label="Open settings"
+      >
+        <Avatar src={avatarSrc || defaultAvatar} circle size="md" />
+      </Button>
     </HStack>
   );
 
@@ -246,28 +286,38 @@ function SiteNavbar({ setExpanded }) {
             <Controls />
           </Navbar.Content>
         ) : (
-         
           <Navbar.Content justify="end">
-            <Button
-              appearance="subtle"
-              onClick={() => setOpen(true)}
-              style={iconBtnStyle}
-              aria-label="Open menu"
-            >
-              <FiMenu size={28} />
-            </Button>
+            <HStack spacing={8} style={{ alignItems: "center" }}>
+              <Button
+                appearance="subtle"
+                onClick={() => setSettingsOpen(true)}
+                style={{ ...iconBtnStyle, padding: 4 }}
+                aria-label="Open settings"
+              >
+                <Avatar src={avatarSrc || defaultAvatar} circle size="md" />
+              </Button>
+              <Button
+                appearance="subtle"
+                onClick={() => setMenuOpen(true)}
+                style={iconBtnStyle}
+                aria-label="Open menu"
+              >
+                <FiMenu size={28} />
+              </Button>
+            </HStack>
           </Navbar.Content>
         )}
       </Navbar>
 
 
       <Drawer
-        open={open}
-        onClose={() => setOpen(false)}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
         placement="right"
         size="xs"
         backdrop={true} 
         keyboard 
+        closeButton={false}
       >
         <Drawer.Header>
           <Drawer.Title
@@ -275,20 +325,6 @@ function SiteNavbar({ setExpanded }) {
           >
             <span style={{ fontWeight: 900 }}>{t("Menu")}</span>
           </Drawer.Title>
-
-          <Button
-            appearance="subtle"
-            onClick={() => setOpen(false)}
-            style={{
-              ...iconBtnStyle,
-              position: "absolute",
-              right: 10,
-              top: 10,
-            }}
-            aria-label="Close"
-          >
-            <IoClose size={24} />
-          </Button>
         </Drawer.Header>
 
         <Drawer.Body>
@@ -299,8 +335,191 @@ function SiteNavbar({ setExpanded }) {
           <Controls inDrawer />
         </Drawer.Body>
       </Drawer>
+
+      <Drawer
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        placement="right"
+        size="md"
+        backdrop={true}
+        keyboard
+        closeButton={false}
+        className="settings-drawer"
+      >
+        <Drawer.Header>
+          <Drawer.Title style={{ fontWeight: 900 }}>Settings</Drawer.Title>
+        </Drawer.Header>
+        <Drawer.Body>
+          <section className="settings-card">
+            <div className="settings-card-title">Shaxsiy ma'lumotlar</div>
+            <div className="settings-profile">
+              <div className="settings-avatar-block">
+                <div className="settings-avatar-preview">
+                  <img src={avatarSrc} alt="Avatar" />
+                </div>
+                <label className="settings-avatar-btn">
+                  {avatarUploading ? "Yuklanmoqda..." : "Rasmni tahrirlash"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      const storageRef = ref(storage, "avatars/profile.jpg");
+                      setAvatarUploading(true);
+                      uploadBytes(storageRef, file)
+                        .then(() => getDownloadURL(storageRef))
+                        .then((url) => {
+                          setAvatarSrc(url);
+                          localStorage.setItem("settings.avatar", url);
+                        })
+                        .finally(() => setAvatarUploading(false));
+                    }}
+                  />
+                </label>
+                <div className="settings-avatar-hint">
+                  500x500 o'lcham, JPEG, JPG, PNG format, maksimum 2MB
+                </div>
+              </div>
+              <div className="settings-info-grid">
+                <div className="settings-info-item">
+                  <span>Ism</span>
+                  <strong>Solijon</strong>
+                </div>
+                <div className="settings-info-item">
+                  <span>Familiya</span>
+                  <strong>Ikromov</strong>
+                </div>
+                <div className="settings-info-item">
+                  <span>Telefon raqam</span>
+                  <strong>(+998) 50 010 07 51</strong>
+                </div>
+                <div className="settings-info-item">
+                  <span>Tug'ilgan sana</span>
+                  <strong>04 Mart, 2003</strong>
+                </div>
+                <div className="settings-info-item">
+                  <span>Jinsi</span>
+                  <strong>Male</strong>
+                </div>
+                <div className="settings-info-item">
+                  <span>HH ID</span>
+                  <strong>37363</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="settings-mini-grid">
+            <div className="settings-mini-card">
+              <div className="settings-mini-head">
+                <span>Kirish</span>
+                <Button
+                  appearance="subtle"
+                  style={{ padding: 0 }}
+                  onClick={() => setEditingLogin((prev) => !prev)}
+                  aria-label="Edit login"
+                >
+                  <FiEdit2 />
+                </Button>
+              </div>
+              {editingLogin ? (
+                <div className="settings-mini-edit">
+                  <Input value={loginId} onChange={setLoginId} size="sm" />
+                  <Button
+                    appearance="primary"
+                    size="sm"
+                    onClick={() => setEditingLogin(false)}
+                  >
+                    Saqlash
+                  </Button>
+                </div>
+              ) : (
+                <div className="settings-mini-value">{loginId}</div>
+              )}
+            </div>
+            <div className="settings-mini-card">
+              <div className="settings-mini-head">
+                <span>Parol</span>
+                <Button
+                  appearance="subtle"
+                  style={{ padding: 0 }}
+                  onClick={() => setEditingPassword((prev) => !prev)}
+                  aria-label="Edit password"
+                >
+                  <FiEdit2 />
+                </Button>
+              </div>
+              {editingPassword ? (
+                <div className="settings-mini-edit">
+                  <Input
+                    value={password}
+                    onChange={setPassword}
+                    size="sm"
+                    type="password"
+                  />
+                  <Button
+                    appearance="primary"
+                    size="sm"
+                    onClick={() => setEditingPassword(false)}
+                  >
+                    Saqlash
+                  </Button>
+                </div>
+              ) : (
+                <div className="settings-mini-value">********</div>
+              )}
+            </div>
+            <div className="settings-mini-card">
+              <div className="settings-mini-head">
+                <span>Bildirishnoma sozlamalari</span>
+                <Button
+                  appearance="subtle"
+                  style={{ padding: 0 }}
+                  onClick={() => setEditingNotifications((prev) => !prev)}
+                  aria-label="Edit notifications"
+                >
+                  <FiEdit2 />
+                </Button>
+              </div>
+              {editingNotifications ? (
+                <div className="settings-mini-edit">
+                  <Toggle
+                    checked={notificationsOn}
+                    onChange={setNotificationsOn}
+                    checkedChildren="On"
+                    unCheckedChildren="Off"
+                  />
+                  <Button
+                    appearance="primary"
+                    size="sm"
+                    onClick={() => setEditingNotifications(false)}
+                  >
+                    Saqlash
+                  </Button>
+                </div>
+              ) : (
+                <div className="settings-mini-value">
+                  {notificationsOn ? "On" : "Off"}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <div className="settings-actions">
+            <Button
+              appearance="ghost"
+              onClick={() => navigate("/login")}
+              className="settings-logout"
+            >
+              Logout
+            </Button>
+          </div>
+        </Drawer.Body>
+      </Drawer>
     </>
   );
 }
 
 export default SiteNavbar;
+
