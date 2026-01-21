@@ -3,6 +3,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import { DashboardLoading, PageNotFound } from "../components";
 import Group from "../pages/Group";
+import SignUp from "../pages/SignUp";
+import Login from "../pages/Login";
+import ProtectedRoute from "./ProtectedRoute";
 const AttendanceHistory = lazy(() => import("../pages/AttendanceHistory"));
 const MarkAttendance = lazy(() => import("../pages/MarkAttendance"));
 const DailyAttendance = lazy(() => import("../pages/DailyAttendance"));
@@ -11,7 +14,11 @@ function Router() {
   const route = createBrowserRouter([
     {
       path: "/",
-      element: <MainLayout />,
+      element: (
+        <ProtectedRoute>
+          <MainLayout />
+        </ProtectedRoute>
+      ),
       children: [
         {
           index: true,
@@ -38,6 +45,14 @@ function Router() {
           element: <Group />,
         },
       ],
+    },
+    {
+      path: "/login",
+      element: <Login />,
+    },
+    {
+      path: "/sign-up",
+      element: <SignUp />,
     },
     {
       path: "*",
