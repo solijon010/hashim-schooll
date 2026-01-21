@@ -12,7 +12,7 @@ import {
   Box,
 } from "rsuite";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 import { FaPlus } from "react-icons/fa6";
@@ -36,11 +36,14 @@ const MainLayout = () => {
   const [isMobile] = useMediaQuery("(max-width: 768px)");
   const isExpanded = expanded && !isMobile;
   const theme = useSelector((state) => state.theme.value);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
   return (
     <Container
       style={{
         minHeight: "100vh",
-        background: theme === "light" ? "#fff" : "#00000044",
+        background: "var(--bg)",
         padding: "10px",
         display: "flex",
         flexDirection: isMobile ? "column" : "row",
@@ -90,7 +93,7 @@ const MainLayout = () => {
               display: "flex",
               flexDirection: "column",
               transition: "all 0.3s",
-              background: theme === "light" ? "#FAFAFA" : "#0F131A",
+              background: "var(--surface-2)",
               borderRadius: "0",
               position: "fixed",
               bottom: "10px",
@@ -98,8 +101,7 @@ const MainLayout = () => {
               right: "0",
               height: "auto",
               width: "100%",
-              border:
-                theme === "light" ? "1px solid #E4E4E7" : "1px solid #2a2c31",
+              border: "1px solid var(--border)",
             }}
             className="mobile-bottom-sidebar"
           >
@@ -139,13 +141,12 @@ const MainLayout = () => {
               display: "flex",
               flexDirection: "column",
               transition: "all 0.3s",
-              background: theme === "light" ? "#FAFAFA" : "#0F131A",
+              background: "var(--surface-2)",
               borderRadius: "5px",
               position: "sticky",
               top: "10px",
               height: "calc(100vh - 20px)",
-              border:
-                theme === "light" ? "1px solid #E4E4E7" : "1px solid #2a2c31",
+              border: "1px solid var(--border)",
             }}
           >
             <Sidenav expanded={isExpanded} h="100%" appearance="subtle">
