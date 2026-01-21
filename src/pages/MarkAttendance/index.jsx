@@ -10,6 +10,7 @@ import {
   Loader,
   Message,
   toaster,
+  Input,
 } from "rsuite";
 import {
   collection,
@@ -31,6 +32,8 @@ import {
 import { MdSave } from "react-icons/md";
 import { TbClockHour4 } from "react-icons/tb";
 import { FaPeopleGroup } from "react-icons/fa6";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 const { Column, HeaderCell, Cell } = Table;
 
@@ -55,13 +58,13 @@ function MarkAttendance() {
   const [students, setStudents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeStudentId, setActiveStudentId] = useState(null);
-  const [delayMinute, setDelayMinute] = useState(5);
+  const [delayMinute, setDelayMinute] = useState();
   const [isAlreadyMarked, setIsAlreadyMarked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [attendanceDate] = useState(new Date().toISOString().split("T")[0]);
-
+  const { t } = useTranslation();
   const groupOptions =
     groups?.map((item) => ({
       label: item.groupName,
@@ -120,10 +123,9 @@ function MarkAttendance() {
         );
       }
     } catch (error) {
-      console.error("Error fetching attendance:", error);
       toaster.push(
         <Message type="error" closable>
-          Ma'lumot yuklashda xatolik!
+          {t("An error occurred while loading data!")}
         </Message>,
         { placement: "topCenter" },
       );
@@ -137,7 +139,7 @@ function MarkAttendance() {
     if (isAlreadyMarked) {
       toaster.push(
         <Message type="warning" closable>
-          Davomat allaqachon saqlangan!
+          {t("Attendance has already been recorded!")}
         </Message>,
         { placement: "topCenter" },
       );
@@ -172,7 +174,7 @@ function MarkAttendance() {
     if (!checkAnyAttendanceMarked()) {
       toaster.push(
         <Message type="warning" closable>
-          Kamida bitta talabaning davomatini belgilang!
+          {t("Mark the attendance of at least one student!")}
         </Message>,
         { placement: "topCenter" },
       );
@@ -180,22 +182,12 @@ function MarkAttendance() {
     }
 
     if (isAlreadyMarked) {
-      toaster.push(
-        <Message type="warning" closable>
-          Bugungi davomat allaqachon saqlangan!
-        </Message>,
-        { placement: "topCenter" },
-      );
+      toast.warning(t("Today's attendance has already been saved!"));
       return;
     }
 
     if (!selectedGroupId) {
-      toaster.push(
-        <Message type="warning" closable>
-          Iltimos, avval guruh tanlang!
-        </Message>,
-        { placement: "topCenter" },
-      );
+      toast.warning(t("Please select a group first!"));
       return;
     }
 
@@ -217,22 +209,11 @@ function MarkAttendance() {
       };
 
       await addDoc(collection(db, "attendance"), attendanceData);
-      toaster.push(
-        <Message type="success" closable>
-          Davomat muvaffaqiyatli saqlandi!
-        </Message>,
-        { placement: "topCenter" },
-      );
+      toast.success(t("Attendance saved successfully!"));
       setIsAlreadyMarked(true);
       setIsDirty(false);
     } catch (error) {
-      console.error("Error saving attendance:", error);
-      toaster.push(
-        <Message type="error" closable>
-          Davomatni saqlashda xatolik!
-        </Message>,
-        { placement: "topCenter" },
-      );
+      toast.error(t("An error occurred while saving attendance!"));
     } finally {
       setSaving(false);
     }
@@ -288,7 +269,6 @@ function MarkAttendance() {
     Thursday: "Payshanba",
     Friday: "Juma",
     Saturday: "Shanba",
-    Sunday: "Yakshanba",
   };
 
   const StatusBadge = ({ status, delay }) => {
@@ -299,34 +279,32 @@ function MarkAttendance() {
       case "present":
         return (
           <div
-            className={`${baseClass} bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800`}
+            className={`flex gap-2 items-center text-green-400/70 select-none`}
           >
-            <FaCheck className="text-xs" /> Keldi
+            <FaCheck className="text-xs" /> {t("Come")}
           </div>
         );
       case "absent":
         return (
           <div
-            className={`${baseClass} bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800`}
+            className={`flex gap-2 items-center text-red-400/70 select-none`}
           >
-            <FaTimes className="text-xs" /> Kelmadi
+            <FaTimes className="text-xs" /> {t("Didn't come")}
           </div>
         );
       case "late":
         return (
           <div
-            className={`${baseClass} bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800`}
+            className={`flex gap-2 items-center text-yellow-400/70 select-none`}
           >
-            <TbClockHour4 className="text-xs" /> Kechikdi{" "}
+            <TbClockHour4 className="text-xs" /> {t("Late")}{" "}
             {delay && <span className="text-[10px] opacity-80">({delay})</span>}
           </div>
         );
       default:
         return (
-          <div
-            className={`${baseClass} bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700`}
-          >
-            <FaClockIcon className="text-xs" /> Kutilmoqda
+          <div className={`${baseClass} text-gray-400 select-none`}>
+            <FaClockIcon className="text-xs" /> {t("Not selected")}
           </div>
         );
     }
@@ -388,7 +366,7 @@ function MarkAttendance() {
 
   return (
     <div
-      className={`min-h-screen ${theme === "dark" ? "bg-slate-950" : "bg-slate-50"}`}
+      className={`min-h-screen ${theme === "dark" ? "bg-[#0F131A] border border-[#2A2C31]" : "bg-[#FAFAFA] border border-[#E4E4E7]"} rounded-md`}
     >
       <div className="max-w-7xl mx-auto p-4 md:p-6">
         {/* Header */}
@@ -412,8 +390,8 @@ function MarkAttendance() {
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
               <InputPicker
                 data={groupOptions}
-                className={`w-full sm:w-56 ${theme === "dark" ? "dark:!bg-slate-800 dark:!border-slate-700" : ""}`}
-                placeholder="Guruhni tanlang"
+                className={`w-full sm:w-56 ${theme === "dark" ? "dark:bg-slate-800 dark:border-slate-700" : ""}`}
+                placeholder={t("Select group")}
                 onChange={setSelectedGroupId}
                 value={selectedGroupId}
                 size="md"
@@ -425,10 +403,10 @@ function MarkAttendance() {
                 <p
                   className={`text-sm font-medium ${theme === "dark" ? "text-slate-300" : "text-slate-700"}`}
                 >
-                  {dayNames[selectedDay]} •{" "}
+                  {t(selectedDay)} •{" "}
                   {selectedDay ===
                   new Date().toLocaleDateString("en-US", { weekday: "long" })
-                    ? "Bugun"
+                    ? t("Today")
                     : ""}
                 </p>
               </div>
@@ -453,7 +431,7 @@ function MarkAttendance() {
                     <p
                       className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}
                     >
-                      Guruh
+                      {t("Group")}
                     </p>
                     <p
                       className={`font-semibold ${theme === "dark" ? "text-white" : "text-slate-900"}`}
@@ -477,7 +455,7 @@ function MarkAttendance() {
                     <p
                       className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}
                     >
-                      Dars vaqti
+                      {t("Class time")}
                     </p>
                     <p
                       className={`font-semibold ${theme === "dark" ? "text-white" : "text-slate-900"}`}
@@ -501,7 +479,7 @@ function MarkAttendance() {
                     <p
                       className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-slate-500"}`}
                     >
-                      Kun
+                      {t("Day")}
                     </p>
                     <p
                       className={`font-semibold ${theme === "dark" ? "text-white" : "text-slate-900"}`}
@@ -524,7 +502,7 @@ function MarkAttendance() {
                   disabled={!isDirty || isAlreadyMarked || saving}
                   loading={saving}
                 >
-                  {isAlreadyMarked ? "Saqlangan" : "Saqlash"}
+                  {isAlreadyMarked ? t("Saved") : t("Save")}
                 </Button>
               </div>
             </div>
@@ -540,7 +518,7 @@ function MarkAttendance() {
                     </div>
                     <div>
                       <p className="font-medium text-emerald-700 dark:text-emerald-300">
-                        Davomat saqlangan
+                        {t("Attendance saved")}
                       </p>
                       <p className="text-sm text-emerald-600 dark:text-emerald-400">
                         {attendanceDate}
@@ -553,7 +531,7 @@ function MarkAttendance() {
                         {students.filter((s) => s.status === "present").length}
                       </div>
                       <div className="text-xs text-emerald-500 dark:text-emerald-500">
-                        Keldi
+                        {t("Came")}
                       </div>
                     </div>
                     <div className="text-center">
@@ -561,7 +539,7 @@ function MarkAttendance() {
                         {students.filter((s) => s.status === "late").length}
                       </div>
                       <div className="text-xs text-amber-500 dark:text-amber-500">
-                        Kechikdi
+                        {t("Late")}
                       </div>
                     </div>
                     <div className="text-center">
@@ -569,7 +547,7 @@ function MarkAttendance() {
                         {students.filter((s) => s.status === "absent").length}
                       </div>
                       <div className="text-xs text-rose-500 dark:text-rose-500">
-                        Kelmadi
+                        {t("Didn't come")}
                       </div>
                     </div>
                   </div>
@@ -587,12 +565,11 @@ function MarkAttendance() {
                 loading={loading}
                 rowHeight={70}
                 rowStyle={(rowData) => getStudentRowStyle(rowData.status)}
-                className={theme === "dark" ? "!bg-slate-900" : ""}
                 headerHeight={60}
               >
                 <Column width={60} align="center" fixed>
                   <HeaderCell
-                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"}`}
+                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"} select-none`}
                   >
                     №
                   </HeaderCell>
@@ -609,20 +586,20 @@ function MarkAttendance() {
 
                 <Column flexGrow={2} minWidth={200}>
                   <HeaderCell
-                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"}`}
+                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"} select-none`}
                   >
-                    Talaba
+                    {t("Students")}
                   </HeaderCell>
                   <Cell>
                     {(rowData) => (
                       <div className="py-2">
                         <div
-                          className={`font-medium ${theme === "dark" ? "text-white" : "text-slate-900"}`}
+                          className={`font-medium ${theme === "dark" ? "text-white" : "text-slate-900"} `}
                         >
                           {rowData.studentName} {rowData.lastName}
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                          {rowData.phoneNumber || "Telefon raqami yo'q"}
+                          +998 {rowData.phoneNumber || t("No phone number")}
                         </div>
                       </div>
                     )}
@@ -631,9 +608,9 @@ function MarkAttendance() {
 
                 <Column width={150} align="center">
                   <HeaderCell
-                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"}`}
+                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"} select-none`}
                   >
-                    Holati
+                    {t("Status")}
                   </HeaderCell>
                   <Cell>
                     {(rowData) => (
@@ -647,76 +624,86 @@ function MarkAttendance() {
                   </Cell>
                 </Column>
 
-                <Column width={280} align="center">
+                <Column width={350} align="center">
                   <HeaderCell
-                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"}`}
+                    className={`font-semibold ${theme === "dark" ? "text-slate-300" : "text-slate-700"} select-none`}
                   >
-                    Harakatlar
+                    {t("Actions")}
                   </HeaderCell>
                   <Cell>
-                    {(rowData) => (
-                      <div className="flex items-center justify-center gap-2">
-                        <ActionButton
-                          icon={FaCheck}
-                          label="Keldi"
-                          status="present"
-                          rowStatus={rowData.status}
-                          onClick={() => updateStatus(rowData.id, "present")}
-                          disabled={
-                            isAlreadyMarked || rowData.status === "present"
-                          }
-                        />
-                        <ActionButton
-                          icon={FaTimes}
-                          label="Yo'q"
-                          status="absent"
-                          rowStatus={rowData.status}
-                          onClick={() => updateStatus(rowData.id, "absent")}
-                          disabled={
-                            isAlreadyMarked || rowData.status === "absent"
-                          }
-                        />
-                        <ActionButton
-                          icon={TbClockHour4}
-                          label="Kech"
-                          status="late"
-                          rowStatus={rowData.status}
-                          onClick={() => updateStatus(rowData.id, "late")}
-                          disabled={
-                            isAlreadyMarked || rowData.status === "late"
-                          }
-                        />
+                    {(rowData) => {
+                      // Birorta status tanlanganini aniqlaymiz (pending bo'lmasa demak tanlangan)
+                      const isAnyStatusSelected = rowData.status !== "pending";
 
-                        {rowData.status !== "pending" && !isAlreadyMarked && (
-                          <button
-                            onClick={() => {
-                              setStudents((prev) =>
-                                prev.map((s) =>
-                                  s.id === rowData.id
-                                    ? { ...s, status: "pending", delay: null }
-                                    : s,
-                                ),
-                              );
-                              setIsDirty(true);
-                            }}
-                            className={`p-1.5 rounded-lg ${theme === "dark" ? "bg-slate-800 hover:bg-slate-700" : "bg-slate-100 hover:bg-slate-200"} transition-colors`}
-                          >
-                            <FaRedo className="text-xs text-slate-500 dark:text-slate-400" />
-                          </button>
-                        )}
-                      </div>
-                    )}
+                      return (
+                        <div className="flex items-center justify-center gap-2">
+                          {/* Keldi - Present */}
+                          <ActionButton
+                            icon={FaCheck}
+                            label={t("Came")}
+                            status="present"
+                            rowStatus={rowData.status}
+                            onClick={() => updateStatus(rowData.id, "present")}
+                            disabled={isAlreadyMarked || isAnyStatusSelected}
+                          />
+
+                          {/* Kelmadi - Absent */}
+                          <ActionButton
+                            icon={FaTimes}
+                            label={t("Didn't come")}
+                            status="absent"
+                            rowStatus={rowData.status}
+                            onClick={() => updateStatus(rowData.id, "absent")}
+                            disabled={isAlreadyMarked || isAnyStatusSelected}
+                          />
+
+                          {/* Kechikdi - Late */}
+                          <ActionButton
+                            icon={TbClockHour4}
+                            label={t("Late")}
+                            status="late"
+                            rowStatus={rowData.status}
+                            onClick={() => updateStatus(rowData.id, "late")}
+                            disabled={isAlreadyMarked || isAnyStatusSelected}
+                          />
+
+                          {/* Qayta tanlash (Reset) tugmasi */}
+                          {isAnyStatusSelected && !isAlreadyMarked && (
+                            <button
+                              title={t("Reset status")}
+                              onClick={() => {
+                                setStudents((prev) =>
+                                  prev.map((s) =>
+                                    s.id === rowData.id
+                                      ? { ...s, status: "pending", delay: null }
+                                      : s,
+                                  ),
+                                );
+                                setIsDirty(true);
+                              }}
+                              className={`p-1.5 rounded-lg ${
+                                theme === "dark"
+                                  ? "bg-slate-800 hover:bg-slate-700 text-slate-400"
+                                  : "bg-slate-100 hover:bg-slate-200 text-slate-500"
+                              } transition-colors`}
+                            >
+                              <FaRedo className="text-xs" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    }}
                   </Cell>
                 </Column>
               </Table>
 
               {students.length === 0 && !loading && (
                 <div className="py-12 text-center">
-                  <div className="text-4xl mb-3">👨‍🎓</div>
+                  <div className="text-4xl mb-3 select-none">👨‍🎓</div>
                   <p
                     className={`text-sm ${theme === "dark" ? "text-slate-400" : "text-slate-600"}`}
                   >
-                    Guruhda talabalar mavjud emas
+                    {t("There are no students in the group")}
                   </p>
                 </div>
               )}
@@ -724,7 +711,7 @@ function MarkAttendance() {
           </>
         ) : (
           <div
-            className={`h-[50vh] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center ${theme === "dark" ? "bg-slate-900/50 border-slate-800" : "bg-white border-slate-300"}`}
+            className={`h-[50vh] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center ${theme === "dark" ? "bg-slate-900/50 border-slate-800" : "bg-white border-slate-300"} select-none`}
           >
             <div
               className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl mb-4 ${theme === "dark" ? "bg-slate-800" : "bg-slate-100"}`}
@@ -734,12 +721,12 @@ function MarkAttendance() {
             <h3
               className={`text-lg font-medium mb-2 ${theme === "dark" ? "text-slate-300" : "text-slate-700"}`}
             >
-              Guruhni tanlang
+              {t("Select group")}
             </h3>
             <p
               className={`text-center max-w-sm text-sm ${theme === "dark" ? "text-slate-500" : "text-slate-600"}`}
             >
-              Davomat qilish uchun yuqoridagi ro'yxatdan guruhni tanlang
+              {t("Select group to attend")}
             </p>
           </div>
         )}
@@ -750,7 +737,7 @@ function MarkAttendance() {
           onClose={() => setIsModalOpen(false)}
           size="xs"
           backdrop="static"
-          className={theme === "dark" ? "dark" : ""}
+          className={theme === "dark" ? "bg-transparent" : "bg-transparent"}
         >
           <Modal.Header>
             <Modal.Title
@@ -763,9 +750,9 @@ function MarkAttendance() {
                   <TbClockHour4 className="text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <div>Kechikish vaqti</div>
+                  <div>{t("Delay time")}</div>
                   <div className="text-xs text-slate-500 dark:text-slate-400">
-                    Talaba necha daqiqa kechikdi?
+                    {t("How many minutes was the student late?")}
                   </div>
                 </div>
               </div>
@@ -774,24 +761,21 @@ function MarkAttendance() {
           <Modal.Body className="py-6">
             <div className="text-center mb-4">
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-                Quyidagi talaba uchun kechikish vaqtini kiriting:
+                {t("Enter the tardy time for the following student:")}
               </p>
               <p className="font-medium dark:text-white">
                 {students.find((s) => s.id === activeStudentId)?.studentName ||
-                  "Talaba"}
+                  t("Student")}
               </p>
             </div>
 
             <Stack justifyContent="center" className="mb-4">
               <div className="text-center">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
-                  Daqiqa
-                </p>
                 <InputNumber
-                  value={delayMinute}
+                  type="number"
+                  defaultValue={delayMinute}
+                  placeholder={t("Minute")}
                   onChange={(v) => setDelayMinute(Number(v))}
-                  min={0}
-                  max={120}
                   style={{ width: 100 }}
                   className="text-center"
                 />
@@ -803,7 +787,7 @@ function MarkAttendance() {
                 className={`inline-block px-3 py-1.5 rounded-lg ${theme === "dark" ? "bg-amber-900/30" : "bg-amber-100"}`}
               >
                 <span className="text-amber-600 dark:text-amber-400 font-medium">
-                  {delayMinute} daqiqa
+                  {delayMinute} {t("Minute")}
                 </span>
               </div>
             </div>
@@ -814,7 +798,7 @@ function MarkAttendance() {
               appearance="subtle"
               className="mr-2"
             >
-              Bekor qilish
+              {t("Cancel")}
             </Button>
             <Button
               onClick={handleDelaySubmit}
@@ -822,7 +806,7 @@ function MarkAttendance() {
               color="yellow"
               className="px-6"
             >
-              Tasdiqlash
+              {t("Confirmation")}
             </Button>
           </Modal.Footer>
         </Modal>
