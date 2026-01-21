@@ -349,14 +349,14 @@ function Group() {
     <div
       style={{
         padding: "clamp(10px, 2vw, 20px)",
-        backgroundColor: theme === "dark" ? "#0F131A" : "#f5f7fa",
+        backgroundColor: theme === "dark" ? "#0F131A" : "#FAFAFA",
         minHeight: "100vh",
       }}
     >
       <style>{`
     /* Asosiy table styling */
     .rs-table {
-      background: ${theme === "dark" ? "#1b212b" : "#ffffff"} !important;
+      background: ${theme === "dark" ? "#0F131A" : "#fcfcfc"} !important;
     }
     
     .rs-table-cell {
@@ -389,7 +389,7 @@ function Group() {
     }
     
     .modal-themed .rs-modal-header {
-      border-bottom: 1px solid ${theme === "dark" ? "#2d3748" : "#e2e8f0"};
+      border-bottom: 1px solid ${theme === "dark" ? "#2d3748" : "#436795"};
       padding: 16px 20px;
     }
     
@@ -545,7 +545,7 @@ function Group() {
     }
     
     .rs-btn-icon:hover {
-      background: ${theme === "dark" ? "#2d3748" : "#f7fafc"};
+      background: ${theme === "dark" ? "#2d3748" : "#2f658a"};
       color: ${theme === "dark" ? "#fff" : "#2d3748"};
     }
     
@@ -598,11 +598,7 @@ function Group() {
     .capitalize-text { text-transform: capitalize; }
   `}</style>
 
-      <Stack
-        justifyContent="space-between"
-        style={{ marginBottom: 20 }}
-        className="group-toolbar"
-      >
+      <Stack justifyContent="space-between" style={{ marginBottom: 20 }}>
         <Stack spacing={10}>
           <h4
             style={{
@@ -638,7 +634,7 @@ function Group() {
           </HStack>
         </Stack>
 
-        <InputGroup inside style={{ width: 300 }} className="group-search">
+        <InputGroup inside style={{ width: 300 }}>
           <Input
             placeholder={t("search_placeholder")}
             value={searchKeyword}
@@ -665,16 +661,10 @@ function Group() {
               />
             </InputGroup.Button>
           )}
-          <InputGroup.Button
-            onClick={triggerSearch}
-            style={{
-              backgroundColor: theme === "dark" ? "#4a5568" : "#edf2f7",
-              borderColor: theme === "dark" ? "#4a5568" : "#e2e8f0",
-            }}
-          >
+          <InputGroup.Button onClick={triggerSearch}>
             <SearchIcon
               style={{
-                color: theme === "dark" ? "#90cdf4" : "#3182ce",
+                color: theme === "dark" ? "#eeeeee" : "#3182ce",
               }}
             />
           </InputGroup.Button>
@@ -686,7 +676,7 @@ function Group() {
         defaultActiveKey={1}
         style={{
           background: theme === "dark" ? "#1a1d24" : "#fff",
-          borderColor: theme === "dark" ? "#2d3748" : "#e2e8f0",
+          borderColor: theme === "dark" ? "#2A2C31" : "#E4E4E7",
           borderRadius: "8px",
           overflow: "hidden",
         }}
@@ -744,7 +734,7 @@ function Group() {
             }}
           >
             <Column width={50} align="center" fixed>
-              <HeaderCell></HeaderCell>
+              <HeaderCell style={{ fontSize: "10px" }}>{t("Check")}</HeaderCell>
               <Cell>
                 {(rowData) => (
                   <Checkbox
@@ -907,8 +897,6 @@ function Group() {
                 setActivePage(p);
                 loadData(p);
               }}
-              prev
-              next
               first
               last
               ellipsis
