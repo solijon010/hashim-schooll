@@ -82,6 +82,46 @@ const resources = {
       error_deleting_student: "Error occurred while deleting",
       error_occurred: "An unexpected error occurred",
       "Mark attendance": "Mark attendance",
+      Check: "Check",
+      Today: "Today",
+      "Attendance saved": "Attendance saved",
+      Came: "Came",
+      "Didn't come": "Didn't come",
+      Late: "Late",
+      Status: "Status",
+      Actions: "Actions",
+      "There are no students in the group":
+        "There are no students in the group",
+      "Select group to attend": "Select a group from the list above to attend",
+      "Delay time": "Delay time",
+      "Enter the tardy time for the following student":
+        "Enter the tardy time for the following student:",
+      "How many minutes was the student late?":
+        "How many minutes was the student late?",
+      "Enter the tardy time for the following student:":
+        "Enter the tardy time for the following student:",
+      Student: "Student",
+      Minute: "Minute",
+      Confirmation: "Confirmation",
+      "Not selected": "Not selected",
+      "An error occurred while loading data!":
+        "An error occurred while loading data!",
+      "Attendance has already been recorded!":
+        "Attendance has already been recorded!",
+      "Mark the attendance of at least one student!":
+        "Mark the attendance of at least one student!",
+      "Today's attendance has already been saved!":
+        "Today's attendance has already been saved!",
+      "Please select a group first!": "Please select a group first!",
+      "Attendance saved successfully!": "Attendance saved successfully!",
+      "An error occurred while saving attendance!":
+        "An error occurred while saving attendance!",
+      Group: "Group",
+      "Class time": "Class time",
+      Day: "Day",
+      Saved: "Saved",
+      Save: "Save",
+      "No phone number": "No phone number",
     },
   },
 
@@ -166,6 +206,45 @@ const resources = {
       error_deleting_student: "O'chirishda xatolik yuz berdi",
       error_occurred: "Kutilmagan xatolik yuz berdi",
       "Mark attendance": "Davomat qlish",
+      Cancel: "Bekor qlish",
+      Check: "Tanlash",
+      Today: "Bugun",
+      "Attendance saved": "Davomat saqlangan",
+      Came: "Keldi",
+      "Didn't come": "Kelmadi",
+      Late: "Late",
+      Status: "Holati",
+      Actions: "Amallar",
+      "There are no students in the group": "Guruhda talabalar yo'q",
+      "Select group to attend":
+        "Davomat qilish uchun yuqoridagi ro'yxatdan guruhni tanlang",
+      "Delay time": "Kechikish vaqti",
+      "Enter the tardy time for the following student":
+        "Quyidagi talaba uchun kechikish vaqtini kiriting:",
+      "How many minutes was the student late?": "Talaba necha daqiqa kechikdi?",
+      "Enter the tardy time for the following student:":
+        "Quyidagi talaba uchun kechikish vaqtini kiriting:",
+      Student: "Talaba",
+      Minute: "Daqiqa",
+      Confirmation: "Tasdiqlash",
+      "Not selected": "Tanlanmagan",
+      "An error occurred while loading data!":
+        "Ma'lumotlarni yuklashda xatolik yuz berdi!",
+      "Attendance has already been recorded!": "Davomat allaqachon olingan!",
+      "Mark the attendance of at least one student!":
+        "Kamida bitta talabaning davomatini belgilang!",
+      "Today's attendance has already been saved!":
+        "Bugungi davomat allaqachon saqlangan!",
+      "Please select a group first!": "Iltimos, avval guruhni tanlang!",
+      "Attendance saved successfully!": "Davomat muvaffaqiyatli saqlandi!",
+      "An error occurred while saving attendance!":
+        "Davomatni saqlashda xatolik yuz berdi!",
+      Group: "Guruh",
+      "Class time": "Dars vaqti",
+      Day: "Kun",
+      Saved: "Saqlangan",
+      Save: "Saqlash",
+      "No phone number": "Telefon raqam yo'q",
     },
   },
 
@@ -249,6 +328,45 @@ const resources = {
       error_deleting_student: "Ошибка при удалении студента",
       error_occurred: "Произошла непредвиденная ошибка",
       "Mark attendance": "Mark attendance",
+      Check: "Выбрать",
+      Today: "Сегодня",
+      "Attendance saved": "Посещаемость сохранена",
+      Came: "Пришел(а)",
+      "Didn't come": "Не пришел(а)",
+      Late: "Опоздал(а)",
+      Status: "Статус",
+      Actions: "Действия",
+      "There are no students in the group": "В группе нет студентов",
+      "Select group to attend":
+        "Выберите группу из списка выше, чтобы отметить посещаемость",
+      "Delay time": "Время опоздания",
+      "Enter the tardy time for the following student":
+        "Введите время опоздания для следующего студента:",
+      "How many minutes was the student late?":
+        "На сколько минут опоздал студент?",
+      "Enter the tardy time for the following student:":
+        "Введите время опоздания для следующего студента:",
+      Student: "Студент",
+      Minute: "Минута",
+      Confirmation: "Подтверждение",
+      "Not selected": "Не выбрано",
+      "An error occurred while loading data!":
+        "Произошла ошибка при загрузке данных!",
+      "Attendance has already been recorded!": "Посещаемость уже отмечена!",
+      "Mark the attendance of at least one student!":
+        "Отметьте посещаемость хотя бы одного студента!",
+      "Today's attendance has already been saved!":
+        "Сегодняшняя посещаемость уже сохранена!",
+      "Please select a group first!": "Пожалуйста, сначала выберите группу!",
+      "Attendance saved successfully!": "Посещаемость успешно сохранена!",
+      "An error occurred while saving attendance!":
+        "Произошла ошибка при сохранении посещаемости!",
+      Group: "Группа",
+      "Class time": "Время занятий",
+      Day: "День",
+      Saved: "Сохранено",
+      Save: "Сохранить",
+      "No phone number": "Номер телефона отсутствует",
     },
   },
 };
