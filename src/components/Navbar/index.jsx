@@ -50,7 +50,7 @@ const Brand = ({ theme, isMobile }) => (
     to={"/"}
     style={{
       textDecoration: "none",
-      color: theme === "light" ? "#111827" : "#E5E7EB",
+      color: "var(--text)",
       display: "inline-flex",
       alignItems: "center",
       minWidth: 0,
@@ -72,7 +72,7 @@ const Brand = ({ theme, isMobile }) => (
         style={{
           margin: 0,
           fontWeight: 900,
-          color: "#2E3192",
+          color: "var(--brand)",
           fontSize: "clamp(14px, 2.2vw, 24px)",
           lineHeight: 1.1,
           whiteSpace: "nowrap",
@@ -94,6 +94,12 @@ function SiteNavbar({ setExpanded }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const defaultAvatar = "https://i.pravatar.cc/150?u=19";
+  const palette = {
+    text: "var(--text)",
+    accentBorder: "var(--accent-weak)",
+    bg: "var(--surface)",
+    border: "var(--border)",
+  };
 
   const isMobile = useIsMobile(768);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -134,7 +140,7 @@ function SiteNavbar({ setExpanded }) {
   );
 
   const iconBtnStyle = {
-    color: theme === "light" ? "#1F2937" : "#E5E7EB",
+    color: palette.text,
     borderRadius: 10,
   };
 
@@ -217,10 +223,7 @@ function SiteNavbar({ setExpanded }) {
                 padding: "8px 12px", 
                 minHeight: 34,
                 fontSize: 16,
-                border:
-                  theme === "light"
-                    ? "1px solid rgba(46,49,146,0.15)"
-                    : "1px solid rgba(46,49,146,0.35)",
+                border: `1px solid ${palette.accentBorder}`,
               }}
             >
               <img
@@ -266,12 +269,12 @@ function SiteNavbar({ setExpanded }) {
       <Navbar
         rounded={"8px"}
         style={{
-          background: theme === "light" ? "#FFFFFF" : "#0B1020",
-          border: theme === "light" ? "1px solid #E4E4E7" : "1px solid #1E2A4A",
+          background: palette.bg,
+          border: `1px solid ${palette.border}`,
           boxShadow:
             theme === "light"
               ? "0 6px 18px rgba(0,0,0,0.06)"
-              : "0 6px 18px rgba(0,0,0,0.25)",
+              : "var(--shadow)",
           paddingLeft: 12,
           paddingRight: 12,
         }}

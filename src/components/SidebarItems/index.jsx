@@ -9,16 +9,20 @@ import { useTranslation } from "react-i18next";
 import { MdPayment } from "react-icons/md";
 import { PiClipboardText } from "react-icons/pi";
 import { useSelector } from "react-redux";
-import React from "react";
+import React, { useState } from "react";
 
 function SidebarItems({ isExpanded, mobileBottom = false }) {
   const location = useLocation();
   const { t } = useTranslation();
   const theme = useSelector((state) => state.theme.value);
   const menuPlacement = mobileBottom ? "topStart" : "rightStart";
-  const menuStyle = mobileBottom
-    ? { bottom: "calc(100% + 8px)", top: "auto" }
-    : undefined;
+  const menuStyle = undefined;
+  const iconSize = mobileBottom ? 16 : 15;
+  const [openKey, setOpenKey] = useState(null);
+  const handleToggle = (key) => (open) => {
+    if (!mobileBottom) return;
+    setOpenKey(open ? key : null);
+  };
 
   const groups = useSelector((state) => state.groups.items);
 
@@ -28,16 +32,19 @@ function SidebarItems({ isExpanded, mobileBottom = false }) {
         as={NavLink}
         to={"/"}
         eventKey="/"
-        icon={<DashboardIcon size={15} />}
+        icon={<DashboardIcon size={iconSize} />}
       >
-        {t("Dashboard")}
+        {mobileBottom ? null : t("Dashboard")}
       </Nav.Item>
       <Nav.Menu
         eventKey="/groups"
-        title={t("Groups")}
-        icon={<PeoplesIcon size={15} />}
+        title={mobileBottom ? null : t("Groups")}
+        icon={<PeoplesIcon size={iconSize} />}
         placement={menuPlacement}
         menuStyle={menuStyle}
+        className={mobileBottom ? "mobile-bottom-dropdown" : undefined}
+        open={mobileBottom ? openKey === "groups" : undefined}
+        onToggle={handleToggle("groups")}
       >
         {groups.map((group) => (
           <Nav.Item
@@ -74,10 +81,13 @@ function SidebarItems({ isExpanded, mobileBottom = false }) {
       </Nav.Menu>
       <Nav.Menu
         eventKey="/attendance"
-        title={t("Attendance")}
-        icon={<PiClipboardText size={15} />}
+        title={mobileBottom ? null : t("Attendance")}
+        icon={<PiClipboardText size={iconSize} />}
         placement={menuPlacement}
         menuStyle={menuStyle}
+        className={mobileBottom ? "mobile-bottom-dropdown" : undefined}
+        open={mobileBottom ? openKey === "attendance" : undefined}
+        onToggle={handleToggle("attendance")}
       >
         <Nav.Item
           eventKey="/dailyAttendancet"
@@ -103,10 +113,13 @@ function SidebarItems({ isExpanded, mobileBottom = false }) {
       </Nav.Menu>
       <Nav.Menu
         eventKey="/payments"
-        title={t("Payments")}
-        icon={<MdPayment size={15} />}
+        title={mobileBottom ? null : t("Payments")}
+        icon={<MdPayment size={iconSize} />}
         placement={menuPlacement}
         menuStyle={menuStyle}
+        className={mobileBottom ? "mobile-bottom-dropdown" : undefined}
+        open={mobileBottom ? openKey === "payments" : undefined}
+        onToggle={handleToggle("payments")}
       >
         <Nav.Item eventKey="3-1">{t("Geo")}</Nav.Item>
         <Nav.Item eventKey="3-2">{t("Devices")}</Nav.Item>
