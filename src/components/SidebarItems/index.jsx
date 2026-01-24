@@ -111,21 +111,14 @@ function SidebarItems({ isExpanded, mobileBottom = false }) {
           {t("Mark attendance")}
         </Nav.Item>
       </Nav.Menu>
-      <Nav.Menu
+      <Nav.Item
+        as={NavLink}
+        to={"/payments"}
         eventKey="/payments"
-        title={mobileBottom ? null : t("Payments")}
         icon={<MdPayment size={iconSize} />}
-        placement={menuPlacement}
-        menuStyle={menuStyle}
-        className={mobileBottom ? "mobile-bottom-dropdown" : undefined}
-        open={mobileBottom ? openKey === "payments" : undefined}
-        onToggle={handleToggle("payments")}
       >
-        <Nav.Item eventKey="3-1">{t("Geo")}</Nav.Item>
-        <Nav.Item eventKey="3-2">{t("Devices")}</Nav.Item>
-        <Nav.Item eventKey="3-3">{t("Loyalty")}</Nav.Item>
-        <Nav.Item eventKey="3-4">{t("Visit Depth")}</Nav.Item>
-      </Nav.Menu>
+        {mobileBottom ? null : t("Payments")}
+      </Nav.Item>
     </Nav>
   );
 }
