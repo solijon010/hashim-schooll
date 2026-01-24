@@ -10,6 +10,7 @@ const AttendanceHistory = lazy(() => import("../pages/AttendanceHistory"));
 const MarkAttendance = lazy(() => import("../pages/MarkAttendance"));
 const DailyAttendance = lazy(() => import("../pages/DailyAttendance"));
 const Dashboard = lazy(() => import("../pages/Dashboard"));
+const Payments = lazy(() => import("../pages/Payments"));
 function Router() {
   const route = createBrowserRouter([
     {
@@ -44,6 +45,10 @@ function Router() {
           path: "/group/:id",
           element: <Group />,
         },
+        {
+          path: "/payments",
+          element: <Payments />,
+        },
       ],
     },
     {
@@ -59,7 +64,11 @@ function Router() {
       element: <PageNotFound />,
     },
   ]);
-  return <RouterProvider router={route} />;
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <RouterProvider router={route} />
+    </Suspense>
+  );
 }
 
 export default Router;
