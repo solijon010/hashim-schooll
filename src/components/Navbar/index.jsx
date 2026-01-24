@@ -22,13 +22,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { changeTheme } from "../../createSlice/ThemeSlice";
 import { changeLanguage } from "../../createSlice/ChangeLanguage";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../../firebase/firebase";
+import { auth, storage } from "../../firebase/firebase";
+import { signOut } from "firebase/auth";
 
 const LANGS = [
   { code: "en", img: "/flags/en.png" },
   { code: "uz", img: "/flags/uz.png" },
   { code: "ru", img: "/flags/ru.png" },
 ];
+
+// Logout
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+    console.log("Foydalanuvchi muvaffaqiyatli chiqdi");
+    // Bu yerda foydalanuvchini login sahifasiga yo'naltirish mumkin
+  } catch (error) {
+    console.error("Chiqishda xatolik yuz berdi:", error.message);
+  }
+};
 
 // md breakpoint
 function useIsMobile(breakpoint = 768) {
@@ -113,7 +125,6 @@ function SiteNavbar({ setExpanded }) {
   const [editingPassword, setEditingPassword] = useState(false);
   const [editingNotifications, setEditingNotifications] = useState(false);
 
- 
   useEffect(() => {
     const el =
       document.getElementById("app-content") || document.getElementById("root");
@@ -208,7 +219,7 @@ function SiteNavbar({ setExpanded }) {
         speaker={<Tooltip>{t("Change language")}</Tooltip>}
       >
         <Dropdown
-          className="lang-dd" 
+          className="lang-dd"
           placement={inDrawer ? "bottomStart" : "bottomEnd"}
           renderToggle={(props, ref) => (
             <Button
@@ -220,7 +231,7 @@ function SiteNavbar({ setExpanded }) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                padding: "8px 12px", 
+                padding: "8px 12px",
                 minHeight: 34,
                 fontSize: 16,
                 border: `1px solid ${palette.accentBorder}`,
@@ -272,9 +283,7 @@ function SiteNavbar({ setExpanded }) {
           background: palette.bg,
           border: `1px solid ${palette.border}`,
           boxShadow:
-            theme === "light"
-              ? "0 6px 18px rgba(0,0,0,0.06)"
-              : "var(--shadow)",
+            theme === "light" ? "0 6px 18px rgba(0,0,0,0.06)" : "var(--shadow)",
           paddingLeft: 12,
           paddingRight: 12,
         }}
@@ -283,7 +292,6 @@ function SiteNavbar({ setExpanded }) {
           <Brand theme={theme} isMobile={isMobile} />
         </Navbar.Content>
 
-     
         {!isMobile ? (
           <Navbar.Content justify="end">
             <Controls />
@@ -312,14 +320,13 @@ function SiteNavbar({ setExpanded }) {
         )}
       </Navbar>
 
-
       <Drawer
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         placement="right"
         size="xs"
-        backdrop={true} 
-        keyboard 
+        backdrop={true}
+        keyboard
         closeButton={false}
       >
         <Drawer.Header>
@@ -512,7 +519,7 @@ function SiteNavbar({ setExpanded }) {
           <div className="settings-actions">
             <Button
               appearance="ghost"
-              onClick={() => navigate("/login")}
+              onClick={handleLogout}
               className="settings-logout"
             >
               Logout
@@ -525,4 +532,3 @@ function SiteNavbar({ setExpanded }) {
 }
 
 export default SiteNavbar;
-
