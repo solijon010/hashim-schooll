@@ -144,6 +144,7 @@ const resources = {
       "Repeat password": "Repeat password",
       "Already have an account?": "Already have an account?",
       Cancel: "Cancel",
+      "Continue with Google": "Continue with Google",
     },
   },
 
@@ -290,6 +291,7 @@ const resources = {
       "Enter password": "Parolni kiriting",
       "Repeat password": "Parolni qayta kiriting",
       "Already have an account?": "Hisobingiz bormi?",
+      "Continue with Google": "Google bilan bog'lash",
     },
   },
 
@@ -434,6 +436,7 @@ const resources = {
       "Repeat password": "Повторите пароль",
       "Already have an account?": "Уже есть аккаунт?",
       Cancel: "Отмена",
+      "Continue with Google": "Войти через Google",
     },
   },
 };
