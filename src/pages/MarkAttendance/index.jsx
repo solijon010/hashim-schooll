@@ -281,7 +281,7 @@ function MarkAttendance() {
           <div
             className={`flex gap-2 items-center text-green-400/70 select-none`}
           >
-            <FaCheck className="text-xs" /> {t("Come")}
+            <FaCheck className="text-xs" /> {t("Present")}
           </div>
         );
       case "absent":
@@ -329,7 +329,7 @@ function MarkAttendance() {
           case "present":
             return `${baseClass} bg-emerald-500 text-white shadow-sm`;
           case "absent":
-            return `${baseClass} bg-rose-500 text-white shadow-sm`;
+            return `${baseClass} bg-rose-500/40 text-white shadow-sm`;
           case "late":
             return `${baseClass} bg-amber-500 text-white shadow-sm`;
           default:
@@ -378,12 +378,12 @@ function MarkAttendance() {
               <h1
                 className={`text-2xl font-bold ${theme === "dark" ? "text-white" : "text-slate-900"}`}
               >
-                Davomat Qilish
+                {t("Take attendance")}
               </h1>
               <p
                 className={`text-sm ${theme === "dark" ? "text-slate-400" : "text-slate-600"}`}
               >
-                Guruh tanlab, talabalarning davomatini belgilang
+                {t("Select a group and record students' attendance")}
               </p>
             </div>
 
@@ -531,7 +531,7 @@ function MarkAttendance() {
                         {students.filter((s) => s.status === "present").length}
                       </div>
                       <div className="text-xs text-emerald-500 dark:text-emerald-500">
-                        {t("Came")}
+                        {t("Present")}
                       </div>
                     </div>
                     <div className="text-center">
@@ -640,7 +640,7 @@ function MarkAttendance() {
                           {/* Keldi - Present */}
                           <ActionButton
                             icon={FaCheck}
-                            label={t("Came")}
+                            label={t("Present")}
                             status="present"
                             rowStatus={rowData.status}
                             onClick={() => updateStatus(rowData.id, "present")}
