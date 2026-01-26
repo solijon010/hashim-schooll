@@ -15,10 +15,10 @@ import {
 import { db } from "../../firebase/firebase";
 
 const STATUS_LABELS = {
-  paid: "To'langan",
-  unpaid: "To'lanmagan",
-  overdue: "Kechiktirilgan",
-  pending: "Kutilmoqda",
+  paid: "Paid",
+  unpaid: "Unpaid",
+  overdue: "Overdue",
+  pending: "Pending",
 };
 
 const normalizeStatus = (data) => {
@@ -229,11 +229,11 @@ function Payments() {
           status,
           date: resolveDate(item),
           studentLabel:
-            fullName || item.student || item.name || "Noma'lum",
+            fullName || item.student || item.name || t("Unknown"),
           groupLabel: item.groupName || item.group || item.groupId || "-",
         };
       }),
-    [payments],
+    [payments, t],
   );
 
   const paidMap = useMemo(() => {
@@ -300,20 +300,20 @@ function Payments() {
         const hasPaidThisMonth = paidMap[student.id] === true;
         const hasPaidEver = paidEverMap[student.id] === true;
         let status = "unpaid";
-        let note = "To'lov kuni: har oyning 7-sanasi";
+        let note = "Payment day: before the 7th";
 
         if (hasPaidThisMonth) {
           status = "paid";
-          note = "To'lov qilingan";
+          note = "Paid";
         } else if (!hasPaidEver && lessons >= 4) {
           status = "overdue";
-          note = "4-darsdan keyin to'lov kerak";
+          note = "Pay after 4 lessons";
         } else if (!hasPaidEver && lessons < 4) {
           status = "pending";
-          note = "4-darsdan keyin to'lov";
+          note = "Payment after 4 lessons";
         } else if (isAfterDueDay) {
           status = "overdue";
-          note = "Muddat o'tgan";
+          note = "Overdue";
         }
 
         return {
@@ -359,26 +359,26 @@ function Payments() {
       <div className="payments-hero">
         <div>
           <h2>{t("Payments")}</h2>
-          <p>To'lovlarni nazorat qilish va kuzatish</p>
+          <p>{t("Track and manage payments")}</p>
         </div>
         <MdPayments size={26} />
       </div>
 
       <div className="payments-stats">
         <div className="payments-stat-card">
-          <span>Jami</span>
+          <span>{t("Total")}</span>
           <strong>{loading ? "..." : stats.total}</strong>
         </div>
         <div className="payments-stat-card">
-          <span>To'langan</span>
+          <span>{t("Paid")}</span>
           <strong>{loading ? "..." : stats.paid}</strong>
         </div>
         <div className="payments-stat-card">
-          <span>To'lanmagan</span>
+          <span>{t("Unpaid")}</span>
           <strong>{loading ? "..." : stats.unpaid}</strong>
         </div>
         <div className="payments-stat-card highlight">
-          <span>Jami tushum</span>
+          <span>{t("Total revenue")}</span>
           <strong>{loading ? "..." : formatAmount(stats.totalAmount)}</strong>
         </div>
       </div>
@@ -388,19 +388,19 @@ function Payments() {
           <HiOutlineSearch size={18} />
           <input
             type="search"
-            placeholder="O'quvchi yoki guruh bo'yicha qidirish"
+            placeholder={t("Search by student or group")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
         <button type="button" className="payments-add" onClick={handleOpen}>
-          To'lov qo'shish
+          {t("Add payment")}
         </button>
         <div className="payments-tabs">
           {[
-            { key: "all", label: "Barchasi" },
-            { key: "paid", label: "To'langan" },
-            { key: "unpaid", label: "To'lanmagan" },
+            { key: "all", label: t("All") },
+            { key: "paid", label: t("Paid") },
+            { key: "unpaid", label: t("Unpaid") },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -416,14 +416,14 @@ function Payments() {
 
       <div className="payments-students">
         <div className="payments-students-head">
-          <h3>O'quvchilar to'lovi</h3>
+          <h3>{t("Student payments")}</h3>
           <div className="payments-group-filter">
-            <span>Guruh</span>
+            <span>{t("Group")}</span>
             <select
               value={groupFilter}
               onChange={(event) => setGroupFilter(event.target.value)}
             >
-              <option value="all">Barchasi</option>
+              <option value="all">{t("All")}</option>
               {groups.map((group) => (
                 <option key={group.id} value={group.id}>
                   {group.groupName}
@@ -434,18 +434,18 @@ function Payments() {
         </div>
         <div className="payments-students-table">
           <div className="payments-students-row head">
-            <span>O'quvchi</span>
-            <span>Guruh</span>
-            <span>Darslar</span>
-            <span>Izoh</span>
-            <span>Holat</span>
-            <span>Amal</span>
+            <span>{t("Student")}</span>
+            <span>{t("Group")}</span>
+            <span>{t("Lessons")}</span>
+            <span>{t("Note")}</span>
+            <span>{t("Status")}</span>
+            <span>{t("Action")}</span>
           </div>
           {loadingStudents && (
-            <div className="payments-empty">Yuklanmoqda...</div>
+            <div className="payments-empty">{t("Loading")}</div>
           )}
           {!loadingStudents && studentRows.length === 0 && (
-            <div className="payments-empty">O'quvchilar topilmadi</div>
+            <div className="payments-empty">{t("No students found")}</div>
           )}
           {!loadingStudents &&
             studentRows.map((student) => (
@@ -455,17 +455,17 @@ function Payments() {
                   <span>{student.phone}</span>
                 </div>
                 <span>{student.groupName}</span>
-                <span>{student.lessons} ta</span>
-                <span className="payments-note">{student.note}</span>
+                <span>{t("Lessons count", { count: student.lessons })}</span>
+                <span className="payments-note">{t(student.note)}</span>
                 <span className={`payment-status ${student.status}`}>
-                  {STATUS_LABELS[student.status] || student.status}
+                  {t(STATUS_LABELS[student.status] || student.status)}
                 </span>
                 <button
                   type="button"
                   className="payments-inline-action"
                   onClick={() => openForStudent(student)}
                 >
-                  To'lov kiritish
+                  {t("Add payment")}
                 </button>
               </div>
             ))}
@@ -474,15 +474,15 @@ function Payments() {
 
       <div className="payments-table">
         <div className="payments-row head">
-          <span>O'quvchi</span>
-          <span>Guruh</span>
-          <span>Sana</span>
-          <span>Summa</span>
-          <span>Holat</span>
+          <span>{t("Student")}</span>
+          <span>{t("Group")}</span>
+          <span>{t("Date")}</span>
+          <span>{t("Amount")}</span>
+          <span>{t("Status")}</span>
         </div>
-        {loading && <div className="payments-empty">Yuklanmoqda...</div>}
+        {loading && <div className="payments-empty">{t("Loading")}</div>}
         {!loading && filtered.length === 0 && (
-          <div className="payments-empty">To'lovlar topilmadi</div>
+          <div className="payments-empty">{t("No payments found")}</div>
         )}
         {!loading &&
           filtered.map((item) => (
@@ -503,7 +503,7 @@ function Payments() {
               </span>
               <span>{formatAmount(item.amount)}</span>
               <span className={`payment-status ${item.status}`}>
-                {STATUS_LABELS[item.status] || item.status}
+                {t(STATUS_LABELS[item.status] || item.status)}
               </span>
             </div>
           ))}
@@ -513,14 +513,14 @@ function Payments() {
         <div className="payments-modal">
           <div className="payments-modal-card">
             <div className="payments-modal-head">
-              <h3>To'lov qo'shish</h3>
+              <h3>{t("Add payment")}</h3>
               <button type="button" onClick={() => setShowForm(false)}>
-                Yopish
+                {t("Close")}
               </button>
             </div>
             <div className="payments-form">
               <label>
-                Guruh
+                {t("Group")}
                 <select
                   value={form.groupId}
                   onChange={(event) => {
@@ -537,7 +537,7 @@ function Payments() {
                     }));
                   }}
                 >
-                  <option value="">Guruh tanlang</option>
+                  <option value="">{t("Select group")}</option>
                   {groups.map((group) => (
                     <option key={group.id} value={group.id}>
                       {group.groupName}
@@ -546,7 +546,7 @@ function Payments() {
                 </select>
               </label>
               <label>
-                O'quvchi
+                {t("Student")}
                 <select
                   value={form.studentId}
                   onChange={(event) => {
@@ -561,7 +561,7 @@ function Payments() {
                     }));
                   }}
                 >
-                  <option value="">O'quvchi tanlang</option>
+                  <option value="">{t("Select student")}</option>
                   {students.map((student) => (
                     <option key={student.id} value={student.id}>
                       {`${student.studentName || student.name || ""} ${
@@ -572,11 +572,11 @@ function Payments() {
                 </select>
               </label>
               <label>
-                Summa
+                {t("Amount")}
                 <input
                   type="number"
                   min="0"
-                  placeholder="Masalan: 300000"
+                  placeholder={t("Amount placeholder")}
                   value={form.amount}
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, amount: event.target.value }))
@@ -584,7 +584,7 @@ function Payments() {
                 />
               </label>
               <label>
-                Sana
+                {t("Date")}
                 <input
                   type="date"
                   value={form.date}
@@ -594,15 +594,15 @@ function Payments() {
                 />
               </label>
               <label>
-                Holat
+                {t("Status")}
                 <select
                   value={form.status}
                   onChange={(event) =>
                     setForm((prev) => ({ ...prev, status: event.target.value }))
                   }
                 >
-                  <option value="paid">To'langan</option>
-                  <option value="unpaid">To'lanmagan</option>
+                  <option value="paid">{t("Paid")}</option>
+                  <option value="unpaid">{t("Unpaid")}</option>
                 </select>
               </label>
             </div>
@@ -612,7 +612,7 @@ function Payments() {
                 className="ghost"
                 onClick={() => setShowForm(false)}
               >
-                Bekor qilish
+                {t("Cancel")}
               </button>
               <button
                 type="button"
@@ -620,7 +620,7 @@ function Payments() {
                 onClick={handleSave}
                 disabled={saving}
               >
-                {saving ? "Saqlanmoqda..." : "Saqlash"}
+                {saving ? t("Saving") : t("Save")}
               </button>
             </div>
           </div>

@@ -123,7 +123,7 @@ function Dashboard() {
       <div className="dashboard-hero">
         <div>
           <h2>{t("Dashboard")}</h2>
-          <p>Umumiy statistika va holat</p>
+          <p>{t("Overall statistics and status")}</p>
         </div>
         <LuLayoutDashboard size={24} />
       </div>
@@ -134,7 +134,7 @@ function Dashboard() {
             <IoPeopleOutline size={20} />
           </div>
           <div>
-            <span>O'quvchilar</span>
+            <span>{t("Students")}</span>
             <strong>{loading ? "..." : stats.students}</strong>
           </div>
         </div>
@@ -143,7 +143,7 @@ function Dashboard() {
             <LuLayoutDashboard size={20} />
           </div>
           <div>
-            <span>Guruhlar</span>
+            <span>{t("Groups")}</span>
             <strong>{loading ? "..." : stats.groups}</strong>
           </div>
         </div>
@@ -152,7 +152,7 @@ function Dashboard() {
             <PiClipboardText size={20} />
           </div>
           <div>
-            <span>Bugungi kelganlar</span>
+            <span>{t("Today's present")}</span>
             <strong>{loading ? "..." : stats.present}</strong>
           </div>
         </div>
@@ -161,7 +161,7 @@ function Dashboard() {
             <MdPayments size={20} />
           </div>
           <div>
-            <span>To'lov qilgan</span>
+            <span>{t("Paid students")}</span>
             <strong>{loading ? "..." : stats.paid}</strong>
           </div>
         </div>
@@ -170,12 +170,12 @@ function Dashboard() {
       <div className="dashboard-grid">
         <div className="dash-panel">
           <div className="dash-panel-head">
-            <h4>Guruhlardagi o'quvchilar</h4>
-            <span>Top guruhlar</span>
+            <h4>{t("Students in groups")}</h4>
+            <span>{t("Top groups")}</span>
           </div>
           <div className="dash-bars">
             {groupCounts.length === 0 && !loading && (
-              <div className="dash-empty">Ma'lumot yo'q</div>
+              <div className="dash-empty">{t("No data")}</div>
             )}
             {groupCounts.map((group) => (
               <div key={group.id} className="dash-bar-row">
@@ -199,8 +199,8 @@ function Dashboard() {
 
         <div className="dash-panel">
           <div className="dash-panel-head">
-            <h4>Davomat bugun</h4>
-            <span>Present/Late/Absent</span>
+            <h4>{t("Attendance today")}</h4>
+            <span>{t("Present/Late/Absent")}</span>
           </div>
           <div className="dash-attendance">
             <div
@@ -209,23 +209,23 @@ function Dashboard() {
             >
               <div className="dash-donut-center">
                 <strong>{attendanceTotal}</strong>
-                <span>Jami</span>
+                <span>{t("Total")}</span>
               </div>
             </div>
             <div className="dash-legend">
               <div>
                 <i className="legend-dot present" />
-                <span>Keldi</span>
+                <span>{t("Present")}</span>
                 <b>{stats.present}</b>
               </div>
               <div>
                 <i className="legend-dot late" />
-                <span>Kechikdi</span>
+                <span>{t("Late")}</span>
                 <b>{stats.late}</b>
               </div>
               <div>
                 <i className="legend-dot absent" />
-                <span>Kelmagan</span>
+                <span>{t("Absent")}</span>
                 <b>{stats.absent}</b>
               </div>
             </div>
@@ -234,8 +234,8 @@ function Dashboard() {
 
         <div className="dash-panel">
           <div className="dash-panel-head">
-            <h4>To'lovlar holati</h4>
-            <span>Paid vs Unpaid</span>
+            <h4>{t("Payments status")}</h4>
+            <span>{t("Paid vs Unpaid")}</span>
           </div>
           <div className="dash-payments">
             <div className="dash-progress">
@@ -246,15 +246,15 @@ function Dashboard() {
             </div>
             <div className="dash-payments-meta">
               <div>
-                <span>To'langan</span>
+                <span>{t("Paid")}</span>
                 <b>{stats.paid}</b>
               </div>
               <div>
-                <span>To'lanmagan</span>
+                <span>{t("Unpaid")}</span>
                 <b>{stats.unpaid}</b>
               </div>
               <div>
-                <span>Foiz</span>
+                <span>{t("Percent")}</span>
                 <b>{paidPct}%</b>
               </div>
             </div>
