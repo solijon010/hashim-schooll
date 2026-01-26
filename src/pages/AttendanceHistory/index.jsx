@@ -62,7 +62,7 @@ const AttendanceManagement = () => {
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [timeFilter, setTimeFilter] = useState("daily");
+  const [timeFilter, setTimeFilter] = useState("3months");
 
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedGroupsForExport, setSelectedGroupsForExport] = useState([]);
