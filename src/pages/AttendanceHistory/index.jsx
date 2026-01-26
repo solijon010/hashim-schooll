@@ -8,7 +8,7 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { db } from "../../firebase/firebase"; // Yo'lni o'zingizga moslang
 import {
   Table,
   Loader,
@@ -49,11 +49,10 @@ import {
   LuTrendingUp,
   LuDownload,
   LuTrash2,
-  // LuMoreHorizontal, // To'g'ri eksport nomi
+  // LuMoreHorizontal,
 } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { BsThreeDotsVertical } from "react-icons/bs";
 
 const AttendanceManagement = () => {
   const theme = useSelector((state) => state.theme.value);
@@ -63,7 +62,7 @@ const AttendanceManagement = () => {
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [timeFilter, setTimeFilter] = useState("3months");
+  const [timeFilter, setTimeFilter] = useState("daily");
 
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedGroupsForExport, setSelectedGroupsForExport] = useState([]);
@@ -87,7 +86,6 @@ const AttendanceManagement = () => {
             return null;
           }
 
-          // Hisob-kitobni osonlashtirish uchun Absent sonini shu yerda hisoblaymiz
           const abs =
             (item.totalStudents || 0) -
             (item.presentCount || 0) -
@@ -145,46 +143,181 @@ const AttendanceManagement = () => {
 
   // 4. DELETE FUNCTION
   const handleDelete = async (id) => {
-    try {
-      await deleteDoc(doc(db, "attendance", id));
-      toast.success(t("Ma'lumot o'chirildi"));
-    } catch (error) {
-      toast.error(t("Xatolik yuz berdi"));
+    if (window.confirm(t("Haqiqatdan ham o'chirmoqchimisiz?"))) {
+      try {
+        await deleteDoc(doc(db, "attendance", id));
+        toast.success(t("Ma'lumot o'chirildi"));
+      } catch (error) {
+        toast.error(t("Xatolik yuz berdi"));
+      }
     }
   };
 
-  // 5. EXCEL EXPORT
+  // 5. EXCEL EXPORT (YANGILANGAN VA CHIROYLI FORMATDA)
   const handleExport = async () => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Davomat");
+    const worksheet = workbook.addWorksheet("Davomat Hisoboti");
 
+    // Ustun kengliklarini sozlash
     worksheet.columns = [
-      { header: "GURUH", key: "group", width: 20 },
-      { header: "SANA", key: "date", width: 15 },
-      { header: "O'QUVCHI", key: "name", width: 25 },
-      { header: "STATUS", key: "status", width: 15 },
-      { header: "KECHIKISH", key: "delay", width: 15 },
+      { width: 10 }, // ID
+      { width: 35 }, // F.I.O
+      { width: 20 }, // Status
+      { width: 25 }, // Izoh/Vaqt
     ];
 
+    // Qaysi guruhlar eksport qilinishini aniqlash
     const exportData =
       selectedGroupsForExport.length > 0
         ? filteredGroups.filter((g) => selectedGroupsForExport.includes(g.id))
         : filteredGroups;
 
-    exportData.forEach((group) => {
-      group.attendance?.forEach((st) => {
-        worksheet.addRow({
-          group: group.groupName,
-          date: group.date,
-          name: `${st.studentName} ${st.lastName || ""}`,
-          status: st.status.toUpperCase(),
-          delay: st.delay || "-",
-        });
-      });
-    });
+    // Har bir guruh uchun loop
+    for (const group of exportData) {
+      // --- 1. GURUH SARLAVHASI (HEADER) ---
+      // Bo'sh qator tashlash (birinchi guruhdan tashqari)
+      if (worksheet.lastRow) {
+        worksheet.addRow([]);
+        worksheet.addRow([]);
+      }
 
+      // Guruh nomi va sanasi
+      const groupTitleRow = worksheet.addRow([
+        `GURUH: ${group.groupName.toUpperCase()}`,
+        "",
+        `SANA: ${group.date}`,
+        `VAQT: ${group.lessonTime}`,
+      ]);
+
+      // Sarlavha dizayni (Ko'k fon, oq yozuv)
+      groupTitleRow.font = {
+        bold: true,
+        size: 12,
+        color: { argb: "FFFFFFFF" },
+      };
+      groupTitleRow.height = 25;
+
+      // Hujayralarni birlashtirish (Merge) - ixtiyoriy, lekin chiroyli ko'rinadi
+      worksheet.mergeCells(`A${groupTitleRow.number}:B${groupTitleRow.number}`);
+
+      // Sarlavha foni
+      ["A", "B", "C", "D"].forEach((col) => {
+        const cell = groupTitleRow.getCell(col);
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF1E40AF" }, // To'q ko'k
+        };
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+
+      // --- 2. JADVAL USTUNLARI (HEADERS) ---
+      const headerRow = worksheet.addRow([
+        "№",
+        "O'QUVCHI ISMI",
+        "HOLATI",
+        "IZOH / KECHIKISH",
+      ]);
+      headerRow.font = { bold: true, color: { argb: "FF000000" } };
+      headerRow.alignment = { horizontal: "center" };
+
+      // Header foni (Kulrang)
+      ["A", "B", "C", "D"].forEach((col) => {
+        const cell = headerRow.getCell(col);
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE2E8F0" }, // Och kulrang
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+
+      // --- 3. STUDENTLAR RO'YXATI ---
+      if (group.attendance && group.attendance.length > 0) {
+        group.attendance.forEach((student, index) => {
+          const statusLower = student.status?.toLowerCase();
+
+          // Status matni
+          let statusText = "NOMA'LUM";
+          let statusColor = "FF000000"; // Qora default
+          let cellBg = "FFFFFFFF"; // Oq default
+
+          if (statusLower === "present") {
+            statusText = "KELGAN";
+            statusColor = "FF15803D"; // To'q yashil
+            cellBg = "FFDCFCE7"; // Och yashil fon
+          } else if (statusLower === "late") {
+            statusText = "KECHIKKAN";
+            statusColor = "FFB45309"; // To'q sariq
+            cellBg = "FFFEF3C7"; // Och sariq fon
+          } else if (statusLower === "absent") {
+            statusText = "KELMAGAN";
+            statusColor = "FFB91C1C"; // To'q qizil
+            cellBg = "FFFEE2E2"; // Och qizil fon
+          }
+
+          const row = worksheet.addRow([
+            index + 1,
+            `${student.studentName} ${student.lastName || ""}`,
+            statusText,
+            student.delay || (statusLower === "absent" ? "-" : ""),
+          ]);
+
+          // Student qatori dizayni
+          row.alignment = { vertical: "middle" };
+
+          // ID ustuni markazda
+          row.getCell(1).alignment = { horizontal: "center" };
+
+          // Status ustunini bo'yash
+          const statusCell = row.getCell(3);
+          statusCell.font = { bold: true, color: { argb: statusColor } };
+          statusCell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: cellBg },
+          };
+          statusCell.alignment = { horizontal: "center" };
+
+          // Hamma kataklarga ramka (border) berish
+          ["A", "B", "C", "D"].forEach((col) => {
+            row.getCell(col).border = {
+              top: { style: "thin", color: { argb: "FFCBD5E1" } },
+              left: { style: "thin", color: { argb: "FFCBD5E1" } },
+              bottom: { style: "thin", color: { argb: "FFCBD5E1" } },
+              right: { style: "thin", color: { argb: "FFCBD5E1" } },
+            };
+          });
+        });
+      } else {
+        worksheet.addRow(["O'quvchilar yo'q"]).font = { italic: true };
+      }
+
+      // Guruh tugagach statistika qatori (Opsional)
+      const statsRow = worksheet.addRow([
+        "JAMI:",
+        `${group.totalStudents || 0} ta o'quvchi`,
+        `Kelgan: ${group.presentCount} | Kechikkan: ${group.lateCount} | Kelmagan: ${group.absentCount}`,
+        "",
+      ]);
+      statsRow.font = { italic: true, size: 10 };
+      worksheet.mergeCells(`C${statsRow.number}:D${statsRow.number}`);
+    }
+
+    // Faylni saqlash
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer]), `Davomat_Hisoboti_${Date.now()}.xlsx`);
+    saveAs(new Blob([buffer]), `Davomat_To'liq_${Date.now()}.xlsx`);
     setShowExportModal(false);
   };
 
@@ -201,7 +334,9 @@ const AttendanceManagement = () => {
 
   return (
     <div
-      className={`min-h-screen p-4 md:p-5 transition-all duration-500  rounded-2xl ${isDark ? "text-white" : "text-slate-800"}`}
+      className={`min-h-screen p-4 md:p-8 transition-all duration-500 ${
+        isDark ? "bg-[#0f172a] text-white" : "bg-slate-50 text-slate-800"
+      }`}
     >
       <div className="max-w-7xl mx-auto space-y-8">
         {/* HEADER */}
@@ -247,7 +382,7 @@ const AttendanceManagement = () => {
 
         {/* ANALYTICS SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* BAR CHART: Kelgan, Kechikkan va Kelmaganlar */}
+          {/* BAR CHART */}
           <div
             className={`lg:col-span-2 p-6 rounded-[2.5rem] border ${glassClass}`}
           >
@@ -288,7 +423,6 @@ const AttendanceManagement = () => {
                       fontWeight: "bold",
                     }}
                   />
-                  {/* BARLAR: HAR BIR STATUS UCHUN */}
                   <Bar
                     name={t("Present")}
                     dataKey="presentCount"
@@ -381,15 +515,15 @@ const AttendanceManagement = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex gap-1">
                       <Badge
-                        label={`${t("Present")}: ${group.presentCount}`}
+                        label={`P: ${group.presentCount}`}
                         color="bg-emerald-500"
                       />
                       <Badge
-                        label={`${t("Late")}: ${group.lateCount}`}
+                        label={`L: ${group.lateCount}`}
                         color="bg-amber-500"
                       />
                       <Badge
-                        label={`${t("Absent")}: ${group.absentCount}`}
+                        label={`A: ${group.absentCount}`}
                         color="bg-red-500"
                       />
                     </div>
@@ -399,7 +533,7 @@ const AttendanceManagement = () => {
                           <IconButton
                             {...props}
                             ref={ref}
-                            icon={<BsThreeDotsVertical />}
+                            // icon={<LuMoreHorizontal />}
                             appearance="subtle"
                             circle
                           />
@@ -417,7 +551,7 @@ const AttendanceManagement = () => {
                   </div>
                 </div>
               }
-              className={`${glassClass} !rounded-2xl overflow-hidden`}
+              className={`${glassClass} !rounded-3xl border-none overflow-hidden transition-all hover:shadow-xl`}
             >
               <Table
                 data={group.attendance || []}
@@ -460,7 +594,7 @@ const AttendanceManagement = () => {
           ))}
         </PanelGroup>
 
-        {/* MODAL */}
+        {/* EXPORT MODAL */}
         <Modal
           open={showExportModal}
           onClose={() => setShowExportModal(false)}
@@ -472,6 +606,9 @@ const AttendanceManagement = () => {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            <div className="mb-2 text-xs opacity-60">
+              Qaysi guruhlar bo'yicha hisobot kerak?
+            </div>
             <CheckPicker
               data={filteredGroups.map((g) => ({
                 label: g.groupName,
@@ -481,6 +618,7 @@ const AttendanceManagement = () => {
               onChange={setSelectedGroupsForExport}
               block
               placeholder={t("Guruhlarni tanlang")}
+              style={{ width: "100%" }}
             />
           </Modal.Body>
           <Modal.Footer>
@@ -503,7 +641,10 @@ const AttendanceManagement = () => {
 // HELPERS
 const Badge = ({ label, color }) => (
   <span
-    className={`${color}/10 ${color.replace("bg-", "text-")} px-2 py-1 rounded-lg text-[10px] font-black border border-current/10`}
+    className={`${color}/10 ${color.replace(
+      "bg-",
+      "text-",
+    )} px-2 py-1 rounded-lg text-[10px] font-black border border-current/10`}
   >
     {label}
   </span>
