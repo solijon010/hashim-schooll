@@ -3,11 +3,13 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { VStack, InputGroup, Input, Nav } from "rsuite";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const SidebarNav = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const groups = useSelector((state) => state.groups.items);
   const theme = useSelector((state) => state.theme.value);
+  const { t } = useTranslation();
 
   const isDark = theme === "dark";
 
@@ -34,7 +36,7 @@ const SidebarNav = () => {
         </InputGroup.Addon>
         <Input
           type="search"
-          placeholder="Search group..."
+          placeholder={t("Search group")}
           onChange={(val) => setSearchTerm(val)}
           value={searchTerm}
           style={{ borderRadius: "3px" }}
@@ -103,7 +105,7 @@ const SidebarNav = () => {
                   fontSize: "13px",
                 }}
               >
-                No results found
+                {t("No results found")}
               </div>
             )}
           </Nav>

@@ -9,9 +9,8 @@ import {
   Dropdown,
   Drawer,
   Input,
-  Toggle,
 } from "rsuite";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TbLayoutSidebar } from "react-icons/tb";
 import { MdOutlineDarkMode } from "react-icons/md";
@@ -23,7 +22,15 @@ import { changeTheme } from "../../createSlice/ThemeSlice";
 import { changeLanguage } from "../../createSlice/ChangeLanguage";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { auth, storage } from "../../firebase/firebase";
-import { signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+  updateProfile,
+} from "firebase/auth";
+import { toast } from "react-toastify";
 
 const LANGS = [
   { code: "en", img: "/flags/en.png" },
@@ -104,7 +111,6 @@ function SiteNavbar({ setExpanded }) {
   const lang = useSelector((state) => state.language.value);
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const defaultAvatar = "https://i.pravatar.cc/150?u=19";
   const palette = {
     text: "var(--text)",
@@ -118,12 +124,18 @@ function SiteNavbar({ setExpanded }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(defaultAvatar);
   const [avatarUploading, setAvatarUploading] = useState(false);
-  const [loginId, setLoginId] = useState("37363");
-  const [password, setPassword] = useState("********");
-  const [notificationsOn, setNotificationsOn] = useState(true);
-  const [editingLogin, setEditingLogin] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [nameInput, setNameInput] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [editingPassword, setEditingPassword] = useState(false);
-  const [editingNotifications, setEditingNotifications] = useState(false);
+  const [savingName, setSavingName] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     const el =
@@ -145,6 +157,14 @@ function SiteNavbar({ setExpanded }) {
     }
   }, [defaultAvatar]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserProfile(user || null);
+      setNameInput(user?.displayName || "");
+    });
+    return () => unsubscribe();
+  }, []);
+
   const currentLang = useMemo(
     () => LANGS.find((l) => l.code === lang) || LANGS[0],
     [lang],
@@ -159,6 +179,58 @@ function SiteNavbar({ setExpanded }) {
     if (code) {
       dispatch(changeLanguage(code));
       i18n.changeLanguage(code);
+    }
+  };
+
+  const handleSaveName = async () => {
+    if (!auth.currentUser) return;
+    if (!nameInput.trim()) {
+      toast.error("Ism bo'sh bo'lmasligi kerak");
+      return;
+    }
+    setSavingName(true);
+    try {
+      await updateProfile(auth.currentUser, { displayName: nameInput.trim() });
+      toast.success("Ism yangilandi");
+      setEditingName(false);
+    } catch (error) {
+      toast.error("Ismni yangilashda xatolik");
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
+    if (!auth.currentUser) return;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Barcha parol maydonlarini toldiring");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Yangi parollar mos emas");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Parol kamida 6 ta belgi bo'lishi kerak");
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      const credential = EmailAuthProvider.credential(
+        auth.currentUser.email || "",
+        currentPassword,
+      );
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, newPassword);
+      toast.success("Parol yangilandi");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setEditingPassword(false);
+    } catch (error) {
+      toast.error("Parolni yangilash uchun qayta login qiling");
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -391,63 +463,44 @@ function SiteNavbar({ setExpanded }) {
                   500x500 o'lcham, JPEG, JPG, PNG format, maksimum 2MB
                 </div>
               </div>
-              <div className="settings-info-grid">
+              <div className="settings-info-list">
                 <div className="settings-info-item">
                   <span>Ism</span>
-                  <strong>Solijon</strong>
+                  {editingName ? (
+                    <div className="settings-mini-edit">
+                      <Input value={nameInput} onChange={setNameInput} />
+                      <Button
+                        appearance="primary"
+                        size="sm"
+                        loading={savingName}
+                        onClick={handleSaveName}
+                      >
+                        Saqlash
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="settings-mini-head">
+                      <strong>{userProfile?.displayName || "-"}</strong>
+                      <Button
+                        appearance="subtle"
+                        style={{ padding: 0 }}
+                        onClick={() => setEditingName(true)}
+                        aria-label="Edit name"
+                      >
+                        <FiEdit2 />
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <div className="settings-info-item">
-                  <span>Familiya</span>
-                  <strong>Ikromov</strong>
-                </div>
-                <div className="settings-info-item">
-                  <span>Telefon raqam</span>
-                  <strong>(+998) 50 010 07 51</strong>
-                </div>
-                <div className="settings-info-item">
-                  <span>Tug'ilgan sana</span>
-                  <strong>04 Mart, 2003</strong>
-                </div>
-                <div className="settings-info-item">
-                  <span>Jinsi</span>
-                  <strong>Male</strong>
-                </div>
-                <div className="settings-info-item">
-                  <span>HH ID</span>
-                  <strong>37363</strong>
+                  <span>Email</span>
+                  <strong>{userProfile?.email || "-"}</strong>
                 </div>
               </div>
             </div>
           </section>
 
           <section className="settings-mini-grid">
-            <div className="settings-mini-card">
-              <div className="settings-mini-head">
-                <span>Kirish</span>
-                <Button
-                  appearance="subtle"
-                  style={{ padding: 0 }}
-                  onClick={() => setEditingLogin((prev) => !prev)}
-                  aria-label="Edit login"
-                >
-                  <FiEdit2 />
-                </Button>
-              </div>
-              {editingLogin ? (
-                <div className="settings-mini-edit">
-                  <Input value={loginId} onChange={setLoginId} size="sm" />
-                  <Button
-                    appearance="primary"
-                    size="sm"
-                    onClick={() => setEditingLogin(false)}
-                  >
-                    Saqlash
-                  </Button>
-                </div>
-              ) : (
-                <div className="settings-mini-value">{loginId}</div>
-              )}
-            </div>
             <div className="settings-mini-card">
               <div className="settings-mini-head">
                 <span>Parol</span>
@@ -463,55 +516,58 @@ function SiteNavbar({ setExpanded }) {
               {editingPassword ? (
                 <div className="settings-mini-edit">
                   <Input
-                    value={password}
-                    onChange={setPassword}
+                    value={currentPassword}
+                    onChange={setCurrentPassword}
                     size="sm"
-                    type="password"
+                    type={showCurrentPassword ? "text" : "password"}
+                    placeholder="Eski parol"
                   />
+                  <button
+                    type="button"
+                    className="settings-eye-btn"
+                    onClick={() => setShowCurrentPassword((prev) => !prev)}
+                  >
+                    {showCurrentPassword ? "Yopish" : "Korsatish"}
+                  </button>
+                  <Input
+                    value={newPassword}
+                    onChange={setNewPassword}
+                    size="sm"
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="Yangi parol"
+                  />
+                  <button
+                    type="button"
+                    className="settings-eye-btn"
+                    onClick={() => setShowNewPassword((prev) => !prev)}
+                  >
+                    {showNewPassword ? "Yopish" : "Korsatish"}
+                  </button>
+                  <Input
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                    size="sm"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Yangi parolni tasdiqlang"
+                  />
+                  <button
+                    type="button"
+                    className="settings-eye-btn"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  >
+                    {showConfirmPassword ? "Yopish" : "Korsatish"}
+                  </button>
                   <Button
                     appearance="primary"
                     size="sm"
-                    onClick={() => setEditingPassword(false)}
+                    loading={savingPassword}
+                    onClick={handleSavePassword}
                   >
                     Saqlash
                   </Button>
                 </div>
               ) : (
                 <div className="settings-mini-value">********</div>
-              )}
-            </div>
-            <div className="settings-mini-card">
-              <div className="settings-mini-head">
-                <span>Bildirishnoma sozlamalari</span>
-                <Button
-                  appearance="subtle"
-                  style={{ padding: 0 }}
-                  onClick={() => setEditingNotifications((prev) => !prev)}
-                  aria-label="Edit notifications"
-                >
-                  <FiEdit2 />
-                </Button>
-              </div>
-              {editingNotifications ? (
-                <div className="settings-mini-edit">
-                  <Toggle
-                    checked={notificationsOn}
-                    onChange={setNotificationsOn}
-                    checkedChildren="On"
-                    unCheckedChildren="Off"
-                  />
-                  <Button
-                    appearance="primary"
-                    size="sm"
-                    onClick={() => setEditingNotifications(false)}
-                  >
-                    Saqlash
-                  </Button>
-                </div>
-              ) : (
-                <div className="settings-mini-value">
-                  {notificationsOn ? "On" : "Off"}
-                </div>
               )}
             </div>
           </section>

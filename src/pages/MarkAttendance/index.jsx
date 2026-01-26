@@ -557,7 +557,7 @@ function MarkAttendance() {
 
             {/* Table */}
             <div
-              className={`rounded-xl overflow-hidden shadow-sm ${theme === "dark" ? "bg-slate-900" : "bg-white"} border ${theme === "dark" ? "border-slate-800" : "border-slate-200"}`}
+              className={`rounded-xl overflow-hidden shadow-sm attendance-table-wrap ${theme === "dark" ? "bg-slate-900" : "bg-white"} border ${theme === "dark" ? "border-slate-800" : "border-slate-200"}`}
             >
               <Table
                 autoHeight
@@ -566,6 +566,7 @@ function MarkAttendance() {
                 rowHeight={70}
                 rowStyle={(rowData) => getStudentRowStyle(rowData.status)}
                 headerHeight={60}
+                className="attendance-table"
               >
                 <Column width={60} align="center" fixed>
                   <HeaderCell
@@ -698,8 +699,8 @@ function MarkAttendance() {
               </Table>
 
               {students.length === 0 && !loading && (
-                <div className="py-12 text-center">
-                  <div className="text-4xl mb-3 select-none">👨‍🎓</div>
+                <div className="attendance-empty">
+                  <div className="attendance-empty-emoji">👨‍🎓</div>
                   <p
                     className={`text-sm ${theme === "dark" ? "text-slate-400" : "text-slate-600"}`}
                   >
